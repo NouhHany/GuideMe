@@ -1,0 +1,443 @@
+/*
+[
+  {
+    "id": "1",
+    "name": "Pyramids of Giza",
+    "description": "Ancient pyramids built as tombs for pharaohs, one of the Seven Wonders.",
+    "imageUrl": "https://res.cloudinary.com/dhmg4fjjy/image/upload/v1742338174/giza_w2qxox.jpg",
+    "latitude": 29.9792,
+    "longitude": 31.1342,
+    "category": "Historical",
+    "rating": 4.8,
+    "constructionHistory": "Constructed around 2630 BC during the 4th Dynasty.",
+    "era": "Old Kingdom",
+    "builder": "Pharaoh Khufu",
+    "audioUrl": "https://example.com/pyramids_audio.mp3",
+    "indoorMap": [
+      {"step": "Enter main entrance", "x": 10, "y": 20},
+      {"step": "Turn left to King's Chamber", "x": 15, "y": 25}
+    ],
+    "routes": {
+      "driving": "Take Cairo-Alexandria Rd, 30 min",
+      "public": "Metro Line 2 to Giza, 45 min"
+    }
+  },
+  {
+    "id": "2",
+    "name": "Luxor Temple",
+    "description": "A large temple complex on the east bank of the Nile.",
+    "imageUrl": "https://res.cloudinary.com/dhmg4fjjy/image/upload/v1742338841/R_w3weno.jpg",
+    "latitude": 25.6993,
+    "longitude": 32.6396,
+    "category": "Historical",
+    "rating": 4.6,
+    "constructionHistory": "Built around 1400 BC during the New Kingdom.",
+    "era": "New Kingdom",
+    "builder": "Amenhotep III",
+    "audioUrl": "https://example.com/luxor_audio.mp3",
+    "indoorMap": [
+      {"step": "Enter via main gate", "x": 5, "y": 10},
+      {"step": "Proceed to Hypostyle Hall", "x": 10, "y": 15}
+    ],
+    "routes": {
+      "driving": "Take Luxor Rd, 4 hours from Cairo",
+      "public": "Train to Luxor Station, 9 hours"
+    }
+  },
+  {
+    "id": "3",
+    "name": "Abu Simbel Temples",
+    "description": "Rock-cut temples dedicated to Ramesses II and Nefertari.",
+    "imageUrl": "https://res.cloudinary.com/dhmg4fjjy/image/upload/v1742221125/egypt_xuae32.jpg",
+    "latitude": 22.3372,
+    "longitude": 31.6258,
+    "category": "Historical",
+    "rating": 4.7,
+    "constructionHistory": "Built around 1264 BC during the 19th Dynasty.",
+    "era": "New Kingdom",
+    "builder": "Ramesses II",
+    "audioUrl": "https://example.com/abu_simbel_audio.mp3",
+    "indoorMap": [
+      {"step": "Enter Great Temple", "x": 8, "y": 12},
+      {"step": "View main statues", "x": 12, "y": 18}
+    ],
+    "routes": {
+      "driving": "Take Aswan-Abu Simbel Rd, 3 hours",
+      "public": "Bus from Aswan, 4 hours"
+    }
+  },
+  {
+    "id": "4",
+    "name": "Karnak Temple",
+    "description": "A vast temple complex dedicated to Amun-Ra.",
+    "imageUrl": "https://example.com/karnak.jpg",
+    "latitude": 25.7188,
+    "longitude": 32.6573,
+    "category": "Historical",
+    "rating": 4.5,
+    "constructionHistory": "Constructed from 2000 BC to 30 BC.",
+    "era": "Middle to New Kingdom",
+    "builder": "Multiple Pharaohs",
+    "audioUrl": "https://example.com/karnak_audio.mp3",
+    "indoorMap": [
+      {"step": "Enter via Avenue of Sphinxes", "x": 20, "y": 30},
+      {"step": "Visit Great Hypostyle Hall", "x": 25, "y": 35}
+    ],
+    "routes": {
+      "driving": "Take Luxor Rd, 4 hours from Cairo",
+      "public": "Train to Luxor, 9 hours"
+    }
+  },
+  {
+    "id": "5",
+    "name": "Valley of the Kings",
+    "description": "Royal tombs for pharaohs of the New Kingdom.",
+    "imageUrl": "https://example.com/valley_kings.jpg",
+    "latitude": 25.7402,
+    "longitude": 32.6014,
+    "category": "Historical",
+    "rating": 4.9,
+    "constructionHistory": "Used from 1539 BC to 1075 BC.",
+    "era": "New Kingdom",
+    "builder": "Various Pharaohs",
+    "audioUrl": "https://example.com/valley_kings_audio.mp3",
+    "indoorMap": [
+      {"step": "Enter Tomb KV62", "x": 15, "y": 25},
+      {"step": "View Tutankhamun’s chamber", "x": 20, "y": 30}
+    ],
+    "routes": {
+      "driving": "Take Luxor West Bank Rd, 15 min",
+      "public": "Ferry to West Bank, 30 min"
+    }
+  },
+  {
+    "id": "6",
+    "name": "Edfu Temple",
+    "description": "Well-preserved temple dedicated to Horus.",
+    "imageUrl": "https://example.com/edfu.jpg",
+    "latitude": 24.9785,
+    "longitude": 32.8734,
+    "category": "Historical",
+    "rating": 4.4,
+    "constructionHistory": "Built between 237 BC and 57 BC.",
+    "era": "Ptolemaic Period",
+    "builder": "Ptolemy III",
+    "audioUrl": "https://example.com/edfu_audio.mp3",
+    "indoorMap": [
+      {"step": "Enter main courtyard", "x": 10, "y": 15},
+      {"step": "Visit Sanctuary of Horus", "x": 15, "y": 20}
+    ],
+    "routes": {
+      "driving": "Take Aswan-Edfu Rd, 2 hours",
+      "public": "Train to Edfu, 3 hours"
+    }
+  },
+  {
+    "id": "7",
+    "name": "Philae Temple",
+    "description": "Temple dedicated to Isis, relocated to Agilkia Island.",
+    "imageUrl": "https://example.com/philae.jpg",
+    "latitude": 24.0258,
+    "longitude": 32.8842,
+    "category": "Historical",
+    "rating": 4.6,
+    "constructionHistory": "Built around 280 BC, Ptolemaic Period.",
+    "era": "Ptolemaic Period",
+    "builder": "Ptolemy II",
+    "audioUrl": "https://example.com/philae_audio.mp3",
+    "indoorMap": [
+      {"step": "Board boat to island", "x": 5, "y": 10},
+      {"step": "Enter main temple", "x": 10, "y": 15}
+    ],
+    "routes": {
+      "driving": "Take Aswan Rd, 20 min",
+      "public": "Boat from Aswan, 30 min"
+    }
+  },
+  {
+    "id": "8",
+    "name": "Saqqara Necropolis",
+    "description": "Site of the Step Pyramid of Djoser.",
+    "imageUrl": "https://example.com/saqqara.jpg",
+    "latitude": 29.8712,
+    "longitude": 31.2164,
+    "category": "Historical",
+    "rating": 4.3,
+    "constructionHistory": "Built around 2700 BC, 3rd Dynasty.",
+    "era": "Old Kingdom",
+    "builder": "Imhotep",
+    "audioUrl": "https://example.com/saqqara_audio.mp3",
+    "indoorMap": [
+      {"step": "Enter Step Pyramid complex", "x": 12, "y": 18},
+      {"step": "Visit Djoser’s tomb", "x": 18, "y": 22}
+    ],
+    "routes": {
+      "driving": "Take Saqqara Rd, 45 min from Cairo",
+      "public": "Bus to Saqqara, 1 hour"
+    }
+  },
+  {
+    "id": "9",
+    "name": "Hatshepsut’s Temple",
+    "description": "Mortuary temple of Queen Hatshepsut.",
+    "imageUrl": "https://example.com/hatshepsut.jpg",
+    "latitude": 25.7383,
+    "longitude": 32.6066,
+    "category": "Historical",
+    "rating": 4.7,
+    "constructionHistory": "Built around 1470 BC, 18th Dynasty.",
+    "era": "New Kingdom",
+    "builder": "Hatshepsut",
+    "audioUrl": "https://example.com/hatshepsut_audio.mp3",
+    "indoorMap": [
+      {"step": "Climb main ramp", "x": 10, "y": 20},
+      {"step": "Enter upper terrace", "x": 15, "y": 25}
+    ],
+    "routes": {
+      "driving": "Take Luxor West Bank Rd, 20 min",
+      "public": "Ferry to West Bank, 35 min"
+    }
+  },
+  {
+    "id": "10",
+    "name": "Kom Ombo Temple",
+    "description": "Dual temple dedicated to Sobek and Horus.",
+    "imageUrl": "https://example.com/kom_ombo.jpg",
+    "latitude": 24.4521,
+    "longitude": 32.9284,
+    "category": "Historical",
+    "rating": 4.5,
+    "constructionHistory": "Built around 180 BC, Ptolemaic Period.",
+    "era": "Ptolemaic Period",
+    "builder": "Ptolemy VI",
+    "audioUrl": "https://example.com/kom_ombo_audio.mp3",
+    "indoorMap": [
+      {"step": "Enter main entrance", "x": 8, "y": 12},
+      {"step": "Visit Sobek’s shrine", "x": 12, "y": 18}
+    ],
+    "routes": {
+      "driving": "Take Aswan-Kom Ombo Rd, 1 hour",
+      "public": "Train to Kom Ombo, 2 hours"
+    }
+  },
+  {
+    "id": "11",
+    "name": "Egyptian Museum, Cairo",
+    "description": "Home to the world's largest collection of Pharaonic antiquities.",
+    "imageUrl": "https://example.com/egyptian_museum.jpg",
+    "latitude": 30.0478,
+    "longitude": 31.2336,
+    "category": "Museum",
+    "rating": 4.7,
+    "constructionHistory": "Opened in 1902, designed by Marcel Dourgnon.",
+    "era": "Modern",
+    "builder": "Egyptian Government",
+    "audioUrl": "https://example.com/museum_audio.mp3",
+    "indoorMap": [
+      {"step": "Enter through main hall", "x": 5, "y": 10},
+      {"step": "Visit Tutankhamun’s treasures", "x": 15, "y": 20}
+    ],
+    "routes": {
+      "driving": "Located in Tahrir Square, central Cairo",
+      "public": "Metro to Sadat Station, 10 min walk"
+    }
+  },
+  {
+    "id": "12",
+    "name": "Siwa Oasis",
+    "description": "Remote desert oasis with ancient ruins and salt lakes.",
+    "imageUrl": "https://example.com/siwa.jpg",
+    "latitude": 29.2041,
+    "longitude": 25.5195,
+    "category": "Natural",
+    "rating": 4.6,
+    "constructionHistory": "Inhabited since prehistoric times.",
+    "era": "Ancient",
+    "builder": "Natural formation",
+    "audioUrl": "https://example.com/siwa_audio.mp3",
+    "indoorMap": [
+      {"step": "Visit Temple of Amun", "x": 10, "y": 15},
+      {"step": "Explore Cleopatra’s Bath", "x": 20, "y": 25}
+    ],
+    "routes": {
+      "driving": "10-hour drive from Cairo via Marsa Matrouh",
+      "public": "Bus from Cairo, 12 hours"
+    }
+  },
+  {
+    "id": "13",
+    "name": "Alexandria Library (Bibliotheca Alexandrina)",
+    "description": "Modern reincarnation of the ancient library, a cultural hub.",
+    "imageUrl": "https://example.com/alex_library.jpg",
+    "latitude": 31.2089,
+    "longitude": 29.9090,
+    "category": "Cultural",
+    "rating": 4.5,
+    "constructionHistory": "Opened in 2002 to revive the ancient library's legacy.",
+    "era": "Modern",
+    "builder": "Egyptian Government/UNESCO",
+    "audioUrl": "https://example.com/library_audio.mp3",
+    "indoorMap": [
+      {"step": "Enter main plaza", "x": 10, "y": 15},
+      {"step": "Visit manuscript gallery", "x": 20, "y": 25}
+    ],
+    "routes": {
+      "driving": "3 hours from Cairo via Desert Rd",
+      "public": "Train to Alexandria, 4 hours"
+    }
+  },
+  {
+    "id": "14",
+    "name": "White Desert",
+    "description": "Surreal landscape of chalk rock formations shaped by wind.",
+    "imageUrl": "https://example.com/white_desert.jpg",
+    "latitude": 27.1833,
+    "longitude": 27.7000,
+    "category": "Natural",
+    "rating": 4.8,
+    "constructionHistory": "Natural erosion over millions of years.",
+    "era": "Prehistoric",
+    "builder": "Natural forces",
+    "audioUrl": "https://example.com/white_desert_audio.mp3",
+    "indoorMap": [
+      {"step": "Enter via Farafra Oasis", "x": 5, "y": 10},
+      {"step": "Explore Mushroom Rock area", "x": 15, "y": 20}
+    ],
+    "routes": {
+      "driving": "5-hour drive from Cairo via Bahariya Oasis",
+      "public": "Tour buses from Cairo, 6 hours"
+    }
+  },
+  {
+    "id": "15",
+    "name": "Citadel of Qaitbay",
+    "description": "15th-century fortress on the Mediterranean coast.",
+    "imageUrl": "https://example.com/qaitbay.jpg",
+    "latitude": 31.2139,
+    "longitude": 29.8856,
+    "category": "Historical",
+    "rating": 4.4,
+    "constructionHistory": "Built in 1477 AD to defend Alexandria.",
+    "era": "Islamic",
+    "builder": "Sultan Qaitbay",
+    "audioUrl": "https://example.com/qaitbay_audio.mp3",
+    "indoorMap": [
+      {"step": "Enter main gate", "x": 8, "y": 12},
+      {"step": "Climb to upper ramparts", "x": 15, "y": 20}
+    ],
+    "routes": {
+      "driving": "Located on Alexandria’s harbor",
+      "public": "Tram to Ras El Tin, 20 min"
+    }
+  },
+  {
+    "id": "16",
+    "name": "Dahab",
+    "description": "Red Sea coastal town famous for diving and laid-back vibe.",
+    "imageUrl": "https://example.com/dahab.jpg",
+    "latitude": 28.5092,
+    "longitude": 34.5139,
+    "category": "Natural",
+    "rating": 4.7,
+    "constructionHistory": "Bedouin fishing village turned tourist hotspot.",
+    "era": "Modern",
+    "builder": "Local communities",
+    "audioUrl": "https://example.com/dahab_audio.mp3",
+    "indoorMap": [
+      {"step": "Visit Lighthouse Reef", "x": 5, "y": 10},
+      {"step": "Explore Blue Hole", "x": 10, "y": 15}
+    ],
+    "routes": {
+      "driving": "8-hour drive from Cairo",
+      "public": "Bus from Sharm El Sheikh, 1.5 hours"
+    }
+  },
+  {
+    "id": "17",
+    "name": "Abydos Temple",
+    "description": "One of Egypt’s oldest cities, with temples to Osiris.",
+    "imageUrl": "https://example.com/abydos.jpg",
+    "latitude": 26.1850,
+    "longitude": 31.9189,
+    "category": "Historical",
+    "rating": 4.5,
+    "constructionHistory": "Dating back to 3000 BC, predynastic era.",
+    "era": "Early Dynastic",
+    "builder": "Pharaoh Seti I",
+    "audioUrl": "https://example.com/abydos_audio.mp3",
+    "indoorMap": [
+      {"step": "Enter Temple of Seti I", "x": 10, "y": 15},
+      {"step": "View the Abydos King List", "x": 15, "y": 20}
+    ],
+    "routes": {
+      "driving": "5-hour drive from Luxor",
+      "public": "Train to Balyana, then taxi"
+    }
+  },
+  {
+    "id": "18",
+    "name": "Mount Sinai",
+    "description": "Sacred mountain where Moses received the Ten Commandments.",
+    "imageUrl": "https://example.com/mount_sinai.jpg",
+    "latitude": 28.5394,
+    "longitude": 33.9753,
+    "category": "Religious",
+    "rating": 4.6,
+    "constructionHistory": "Religious site for millennia.",
+    "era": "Ancient",
+    "builder": "Natural formation",
+    "audioUrl": "https://example.com/sinai_audio.mp3",
+    "indoorMap": [
+      {"step": "Start climb at St. Catherine’s Monastery", "x": 5, "y": 10},
+      {"step": "Reach summit for sunrise", "x": 15, "y": 25}
+    ],
+    "routes": {
+      "driving": "6-hour drive from Cairo",
+      "public": "Bus to St. Catherine, 8 hours"
+    }
+  },
+  {
+    "id": "19",
+    "name": "Aswan High Dam",
+    "description": "Engineering marvel controlling the Nile’s floods.",
+    "imageUrl": "https://example.com/aswan_dam.jpg",
+    "latitude": 23.9711,
+    "longitude": 32.8789,
+    "category": "Modern",
+    "rating": 4.2,
+    "constructionHistory": "Built 1960–1970 to replace Old Aswan Dam.",
+    "era": "20th Century",
+    "builder": "Egyptian/Soviet engineers",
+    "audioUrl": "https://example.com/dam_audio.mp3",
+    "indoorMap": [
+      {"step": "Visit observation pavilion", "x": 10, "y": 15},
+      {"step": "View Lake Nasser", "x": 20, "y": 25}
+    ],
+    "routes": {
+      "driving": "15 min from Aswan city center",
+      "public": "Taxi from Aswan, 20 min"
+    }
+  },
+  {
+    "id": "20",
+    "name": "Khan El-Khalili Bazaar",
+    "description": "Historic Cairo market dating to the 14th century.",
+    "imageUrl": "https://example.com/khan_khalili.jpg",
+    "latitude": 30.0475,
+    "longitude": 31.2625,
+    "category": "Cultural",
+    "rating": 4.3,
+    "constructionHistory": "Established in 1382 as a trading hub.",
+    "era": "Islamic",
+    "builder": "Emir Djaharks el-Khalili",
+    "audioUrl": "https://example.com/bazaar_audio.mp3",
+    "indoorMap": [
+      {"step": "Enter via Al-Muizz Street", "x": 5, "y": 10},
+      {"step": "Explore goldsmiths’ alley", "x": 15, "y": 20}
+    ],
+    "routes": {
+      "driving": "Located in Islamic Cairo",
+      "public": "Metro to Ataba, 10 min walk"
+    }
+  }
+]*/

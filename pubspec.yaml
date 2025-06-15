@@ -1,0 +1,102 @@
+name: guideme
+description: "GuideMe is an innovative mobile application designed to help visitors and tourists explore Egypt’s historical and cultural landmarks with ease. The app automatically detects the user's location upon opening, displaying nearby tourist attractions for a seamless navigation experience. Each site features a detailed historical overview, including a brief description, images, construction history, and information about who built it and in which era.
+One of GuideMe’s standout features is its in-depth indoor navigation, providing step-by-step directions inside historical sites. For instance, users can be guided to specific rooms, such as a ruler’s chamber, with details about their significance. Additionally, the app offers both public transportation and driving routes to each destination, ensuring hassle-free travel.
+Users can search for specific landmarks, making it easy to find places of interest. Moreover, GuideMe includes an audio guide feature, allowing users to listen to historical information instead of reading, enhancing accessibility for all types of travelers. By combining real-time location tracking, historical insights, and advanced navigation, GuideMe aims to revolutionize how tourists experience Egypt’s rich heritage."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.7.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations: # Add this
+    sdk: flutter
+  firebase_core: ^3.6.0
+  firebase_auth: ^5.3.1
+  firebase_analytics: ^11.3.1
+  firebase_messaging: ^15.2.7
+  cloud_firestore: ^5.4.4
+  google_sign_in: ^6.2.1
+  sign_in_with_apple: ^6.1.3
+  flutter_secure_storage: ^9.2.2
+  flutter_local_notifications: ^17.0.0
+  shared_preferences: ^2.5.2
+  flutter_signin_button: ^2.0.0
+  jwt_decoder: ^2.0.1
+  image_picker: ^1.0.0
+  animations: ^2.0.0
+  geolocator: ^13.0.2
+  cupertino_icons: ^1.0.8
+  provider: ^6.0.0
+  shimmer: ^3.0.0
+  google_maps_flutter: ^2.10.0
+  carousel_slider: ^5.0.0
+  flutter_dotenv: ^5.1.0
+  flutter_map: ^7.0.2
+  flutter_osm_plugin: ^1.3.8
+  latlong2: ^0.9.1
+  location: ^7.0.1
+  url_launcher: ^6.0.9
+  cached_network_image: ^3.3.0
+  intl: ^0.19.0
+  permission_handler: ^11.3.1
+  flutter_tts: ^4.0.2
+  http: ^1.4.0
+  flutter_google_maps_webservices: ^1.1.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  flutter_native_splash: ^2.4.1
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/splash/splash.png"
+  adaptive_icon_foreground: "assets/images/splash/splash.png"
+  adaptive_icon_background: "#ffffff"
+
+flutter_native_splash:
+  image: assets/images/splash/splash.png
+  color: "#ffffff"
+  android: true
+  ios: true
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/placeholder.jpg
+    - assets/images/gov/cairo.png
+    - assets/images/gov/alexandria.png
+    - assets/images/gov/red_sea.png
+    - assets/images/gov/south_sinai.png
+    - assets/images/gov/aswan.png
+    - assets/images/gov/fayoum.png
+    - assets/images/logo/google.png
+    - assets/images/splash/splash.png
+    - assets/places.json
+    - assets/images/auth/image (1).jpeg
+    - assets/images/auth/image (2).jpeg
+    - assets/images/auth/image (3).jpeg
+    - assets/images/auth/image (4).jpeg
+    - assets/images/auth/image (5).jpeg
+    - assets/images/auth/image (6).jpeg
+    - assets/images/auth/image (7).jpeg
+    - assets/images/auth/image (8).jpeg
+    - assets/images/auth/image (9).jpeg
+    - assets/images/auth/image (10).jpeg
+    - assets/images/auth/image (11).jpeg
+    - assets/images/auth/image (12).jpeg
+    - assets/images/auth/image (13).jpeg
+    - assets/images/auth/image (14).jpeg
+    - assets/images/auth/image (15).jpeg
+    - assets/images/auth/image (16).jpeg
+    - assets/images/auth/image (17).jpeg
+    - assets/images/auth/image (18).jpeg
+    - assets/images/auth/image (19).jpeg
+    - assets/images/auth/image (20).jpeg
+    - assets/images/auth/image (21).jpeg
+    - assets/images/auth/image (22).jpeg

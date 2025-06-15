@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "765090949581",
+    "project_id": "guideme-eb7a2",
+    "storage_bucket": "guideme-eb7a2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:765090949581:android:f6d7546687dc6b69223c84",
+        "android_client_info": {
+          "package_name": "com.example.guideme"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "765090949581-8fd00vpg5c7sfq9db7kg85v23h7eb7gd.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.guideme",
+            "certificate_hash": "18daab6d18dce5a4dd820f1beb4c7b7bd78387c6"
+          }
+        },
+        {
+          "client_id": "765090949581-p210hk22eknag19vtqf8si00ok7b95n8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCpi-faxN1hToeQC9OvF81vkgsjxEtu9wI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "765090949581-p210hk22eknag19vtqf8si00ok7b95n8.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "765090949581-7sgdlm0ee5atcvc78kng6jiuus0jf68v.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.guideme"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
