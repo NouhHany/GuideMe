@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:url_launcher/url_launcher.dart'; // Add this for launching URLs
-
+import 'package:url_launcher/url_launcher.dart';
 import '../../Models/Place.dart';
 import '../../Services/google_places_api.dart';
 import '../../Services/wiki_api.dart';
@@ -28,7 +27,7 @@ class _PlaceDetailsScreenState extends State<PlaceDetailsScreen>
   double _audioProgress = 0.0;
   double _audioDuration = 0.0;
   String? _currentText;
-  late GoogleMapController _mapController;
+  GoogleMapController? _mapController;
 
   @override
   void initState() {
@@ -36,7 +35,6 @@ class _PlaceDetailsScreenState extends State<PlaceDetailsScreen>
     _tabController = TabController(length: 2, vsync: this);
     _configureTts();
     _loadEnv();
-    // Do not initialize _mapController here; it will be set in onMapCreated
   }
 
   Future<void> _loadEnv() async {
@@ -49,7 +47,7 @@ class _PlaceDetailsScreenState extends State<PlaceDetailsScreen>
       if (mounted) {
         setState(() {
           _audioProgress = endOffset / text.length;
-          _audioDuration = text.length / 50.0; // Approximate duration in seconds
+          _audioDuration = text.length / 50.0;
         });
       }
     });
@@ -75,26 +73,19 @@ class _PlaceDetailsScreenState extends State<PlaceDetailsScreen>
 
   Future<void> _toggleDescriptionAudio(String text) async {
     if (!mounted) return;
-
     _currentText = text;
     await _tts.stop();
-
     if (_isPlayingDescription) {
       await _tts.pause();
-      setState(() {
-        _isPlayingDescription = false;
-      });
+      setState(() { _isPlayingDescription = false; });
     } else {
       await _tts.speak(text);
-      setState(() {
-        _isPlayingDescription = true;
-      });
+      setState(() { _isPlayingDescription = true; });
     }
   }
 
   Future<void> _seekDescriptionAudio(double value) async {
     if (!mounted || _currentText == null) return;
-
     final text = _currentText!;
     final newPosition = (value * text.length).toInt().clamp(0, text.length - 1);
     await _tts.stop();
@@ -110,7 +101,9 @@ class _PlaceDetailsScreenState extends State<PlaceDetailsScreen>
     return url.startsWith('http://') || url.startsWith('https://');
   }
 
-  void _changeImage(int delta, List<String> imageList) {
+  void _changeImage(int delta) {
+    final imageList = widget.place.imageUrls.where(_isValidNetworkUrl).toList();
+    if (_isValidNetworkUrl(widget.place.imageUrl)) imageList.insert(0, widget.place.imageUrl);
     if (imageList.isNotEmpty) {
       setState(() {
         _currentImageIndex = (_currentImageIndex + delta) % imageList.length;
@@ -123,15 +116,32 @@ class _PlaceDetailsScreenState extends State<PlaceDetailsScreen>
   void dispose() {
     _tts.stop();
     _tabController.dispose();
-    _mapController.dispose();
+    _mapController?.dispose();
     super.dispose();
   }
 
-  // Function to launch Google Maps for directions
+  Future<void> _launchDirections() async {
+    final lat = widget.place.latitude;
+    final lng = widget.place.longitude;
+    if (lat == 0 && lng == 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Invalid location coordinates')),
+      );
+      return;
+    }
+    final url = 'https://www.google.com/maps/dir/?api=1&destination=$lat,$lng';
+    if (await canLaunchUrl(Uri.parse(url))) {
+      await launchUrl(Uri.parse(url));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not open Google Maps')),
+      );
+    }
+  }
 
   void _moveCameraToPlace() {
-    if (_mapController != null) {
-      _mapController.animateCamera(
+    if (_mapController != null && widget.place.latitude != 0 && widget.place.longitude != 0) {
+      _mapController!.animateCamera(
         CameraUpdate.newLatLngZoom(
           LatLng(widget.place.latitude, widget.place.longitude),
           14.0,
@@ -239,9 +249,11 @@ class _PlaceDetailsScreenState extends State<PlaceDetailsScreen>
             }
 
             final place = googleSnapshot.data ?? widget.place;
+            final imageList = place.imageUrls.where(_isValidNetworkUrl).toList();
+            if (_isValidNetworkUrl(place.imageUrl)) imageList.insert(0, place.imageUrl);
 
             return FutureBuilder<WikiSummary>(
-              future: fetchWikipediaSummary(context,widget.place.name),
+              future: fetchWikipediaSummary(context, widget.place.name),
               builder: (context, wikiSnapshot) {
                 if (wikiSnapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
@@ -252,9 +264,6 @@ class _PlaceDetailsScreenState extends State<PlaceDetailsScreen>
 
                 final wikiSummary = wikiSnapshot.data ??
                     WikiSummary(title: place.name, extract: 'No summary available', metadata: {});
-
-                final imageList = place.imageUrls.where(_isValidNetworkUrl).toList();
-                if (_isValidNetworkUrl(place.imageUrl)) imageList.insert(0, place.imageUrl);
 
                 final placeType = (place.category.toLowerCase() +
                     (place.subCategory?.toLowerCase() ?? '') +
@@ -309,11 +318,11 @@ class _PlaceDetailsScreenState extends State<PlaceDetailsScreen>
                                   children: [
                                     IconButton(
                                       icon: const Icon(Icons.arrow_left, color: Colors.white, size: 32),
-                                      onPressed: () => _changeImage(-1, imageList),
+                                      onPressed: () => _changeImage(-1),
                                     ),
                                     IconButton(
                                       icon: const Icon(Icons.arrow_right, color: Colors.white, size: 32),
-                                      onPressed: () => _changeImage(1, imageList),
+                                      onPressed: () => _changeImage(1),
                                     ),
                                   ],
                                 ),
@@ -356,7 +365,7 @@ class _PlaceDetailsScreenState extends State<PlaceDetailsScreen>
                                         const Icon(Icons.star, color: Colors.amber, size: 20),
                                         SizedBox(width: screenWidth * 0.01),
                                         Text(
-                                          place.rating.toStringAsFixed(1),
+                                          place.rating?.toStringAsFixed(1) ?? 'N/A',
                                           style: theme.textTheme.titleMedium?.copyWith(fontSize: textScaler.scale(16)),
                                         ),
                                       ],
@@ -388,9 +397,6 @@ class _PlaceDetailsScreenState extends State<PlaceDetailsScreen>
                                   ),
                                 ),
                                 SizedBox(height: screenHeight * 0.02),
-
-
-                                SizedBox(height: screenHeight * 0.01),
                                 _buildDynamicFields(wikiSummary, placeType),
                                 SizedBox(height: screenHeight * 0.02),
                                 if (wikiSummary.thumbnailUrl != null)
@@ -428,14 +434,15 @@ class _PlaceDetailsScreenState extends State<PlaceDetailsScreen>
                                   ],
                                 ),
                                 SizedBox(height: screenHeight * 0.02),
-                                Text(
-                                  'Play Description',
-                                  style: theme.textTheme.bodyMedium?.copyWith(
-                                    color: const Color(0xFFD4B087),
-                                    fontSize: textScaler.scale(16),
-                                    fontWeight: FontWeight.bold,
+                                SizedBox(height: screenHeight * 0.02),
+                                ElevatedButton.icon(
+                                  icon: const Icon(Icons.directions, color: Colors.white),
+                                  label: const Text('Get Directions', style: TextStyle(color: Colors.white)),
+                                  onPressed: _launchDirections,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Color(0xFFD4B087),
+                                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                                   ),
-                                  textAlign: TextAlign.center,
                                 ),
                               ],
                             ),
@@ -447,14 +454,14 @@ class _PlaceDetailsScreenState extends State<PlaceDetailsScreen>
                                   _moveCameraToPlace();
                                 },
                                 initialCameraPosition: CameraPosition(
-                                  target: LatLng(0, 0), // Default position, will be updated
+                                  target: LatLng(widget.place.latitude, widget.place.longitude),
                                   zoom: 14.0,
                                 ),
                                 markers: {
                                   Marker(
-                                    markerId: MarkerId('place'),
-                                    position: LatLng(place.latitude, place.longitude),
-                                    infoWindow: InfoWindow(title: place.name),
+                                    markerId: const MarkerId('place'),
+                                    position: LatLng(widget.place.latitude, widget.place.longitude),
+                                    infoWindow: InfoWindow(title: widget.place.name),
                                   ),
                                 },
                               ),
