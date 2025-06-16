@@ -1,8 +1,8 @@
+/*
 import 'package:flutter/material.dart';
 import 'package:flutter_google_maps_webservices/places.dart';
 import 'package:guideme/Models/Place.dart';
 import 'package:geolocator/geolocator.dart';
-
 import '../../../core/AppLocalizations.dart';
 
 class NearbyHotels extends StatefulWidget {
@@ -10,7 +10,6 @@ class NearbyHotels extends StatefulWidget {
   final Function(String) toggleSavedPlace;
   final Set<String> savedPlaces;
   final Function(Place) navigateToPlaceDetails;
-  final Function(double) buildRatingStars;
 
   const NearbyHotels({
     super.key,
@@ -18,7 +17,6 @@ class NearbyHotels extends StatefulWidget {
     required this.toggleSavedPlace,
     required this.savedPlaces,
     required this.navigateToPlaceDetails,
-    required this.buildRatingStars,
   });
 
   @override
@@ -41,10 +39,11 @@ class _NearbyHotelsState extends State<NearbyHotels> {
       try {
         position = await _determinePosition();
       } catch (e) {
-        // Fallback to a default location (e.g., Cairo) if location access fails
+        print('Location error: $e');
+        // Fallback to a default location (e.g., New York City)
         position = Position(
-          latitude: 30.0444,
-          longitude: 31.2357,
+          latitude: 40.7128,
+          longitude: -74.0060,
           timestamp: DateTime.now(),
           accuracy: 0,
           altitude: 0,
@@ -58,62 +57,76 @@ class _NearbyHotelsState extends State<NearbyHotels> {
 
       final center = Location(lat: position.latitude, lng: position.longitude);
       // Define search radii to try (in meters)
-      final List<int> searchRadii = [5000, 10000, 20000, 50000]; // 5km, 10km, 20km, 50km
+      final List<int> searchRadii = [5000, 10000, 20000, 50000];
       List<Place> hotels = [];
 
       // Try each radius until hotels are found or all radii are exhausted
       for (int radius in searchRadii) {
-        final response = await widget.places.searchNearbyWithRadius(
-          center,
-          radius,
-          type: 'lodging',
-        );
+        try {
+          final response = await widget.places.searchNearbyWithRadius(
+            center,
+            radius,
+            type: 'lodging', // Use 'lodging' as primary type for broader initial fetch
+          );
 
-        if (response.isOkay && response.results.isNotEmpty) {
-          for (var result in response.results) {
-            // Only include places explicitly tagged as 'hotel' in their types
-            if (result.types != null &&
-                result.types!.contains('hotel') &&
-                result.rating != null &&
-                result.rating! >= 4.0) {
-              hotels.add(
-                Place(
-                  id: result.placeId ?? '',
-                  name: result.name ?? 'Unnamed Hotel',
-                  description: result.vicinity ?? 'No description available',
-                  imageUrl: result.photos?.isNotEmpty == true
-                      ? _getPhotoUrl(result.photos!.first.photoReference!)
-                      : '',
-                  latitude: result.geometry?.location.lat ?? position.latitude,
-                  longitude: result.geometry?.location.lng ?? position.longitude,
-                  category: 'hotel',
-                  rating: result.rating?.toDouble() ?? 0.0,
-                  constructionHistory: 'Unknown',
-                  era: 'Unknown',
-                  builder: 'Unknown',
-                  audioUrl: '',
-                  indoorMap: [],
-                  routes: {},
-                  imageUrls: [],
-                ),
-              );
+          print('API Response for radius $radius: ${response.status}');
+
+          if (response.isOkay && response.results.isNotEmpty) {
+            for (var result in response.results) {
+              // Strictly filter for places with 'hotel' type and rating >= 3.0
+              if (result.types != null &&
+                  result.types!.contains('hotel') && // Explicitly check for 'hotel'
+                  result.rating != null &&
+                  result.rating! >= 3.0) {
+                hotels.add(
+                  Place(
+                    id: result.placeId ?? '',
+                    name: result.name ?? 'Unnamed Hotel',
+                    description: result.vicinity ?? 'No description available',
+                    imageUrl: result.photos?.isNotEmpty == true
+                        ? _getPhotoUrl(result.photos!.first.photoReference!)
+                        : 'https://via.placeholder.com/400x300.png?text=No+Image',
+                    latitude: result.geometry?.location.lat ?? position.latitude,
+                    longitude: result.geometry?.location.lng ?? position.longitude,
+                    category: 'hotel',
+                    rating: result.rating?.toDouble() ?? 0.0,
+                    constructionHistory: 'Unknown',
+                    era: 'Unknown',
+                    builder: 'Unknown',
+                    audioUrl: '',
+                    indoorMap: [],
+                    routes: {},
+                    imageUrls: [],
+                  ),
+                );
+              }
             }
           }
+        } catch (e) {
+          print('Error fetching hotels for radius $radius: $e');
         }
-        // If hotels are found, stop searching
-        if (hotels.isNotEmpty) {
+        // If sufficient hotels are found (e.g., at least 5), stop searching
+        if (hotels.length >= 5) {
+          print('Found ${hotels.length} hotels at radius $radius');
           break;
         }
       }
 
+      if (hotels.isEmpty) {
+        print('No hotels found after trying all radii');
+      }
       return hotels;
     } catch (e) {
-      throw Exception('Failed to load nearby hotels: $e');
+      print('Failed to load nearby hotels: $e');
+      return []; // Return empty list instead of throwing to handle gracefully in UI
     }
   }
 
   String _getPhotoUrl(String photoReference) {
-    return 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=$photoReference&key=AIzaSyD3iQPOazh9GfAOl44Y9kDHDJ0zyNqARSA';
+    // Replace YOUR_API_KEY with your actual Google Places API key
+    // Consider storing this in a secure configuration (e.g., .env file)
+    const apiKey = 'YOUR_API_KEY'; // Replace with actual API key
+    return 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=$photoReference&key=$apiKey';
   }
 
   Future<Position> _determinePosition() async {
@@ -140,7 +153,9 @@ class _NearbyHotelsState extends State<NearbyHotels> {
     }
 
     // Get current position
-    return await Geolocator.getCurrentPosition();
+    return await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high,
+    );
   }
 
   @override
@@ -169,9 +184,9 @@ class _NearbyHotelsState extends State<NearbyHotels> {
                 } else if (snapshot.hasError) {
                   return Center(
                     child: Text(
-                      AppLocalizations.of(context)
-                          .translate('error_loading_nearby_hotels'),
-                      style: TextStyle(color: Colors.red[800]),
+                      AppLocalizations.of(context).translate('error_loading_nearby_hotels'),
+                      style: TextStyle(color: theme.colorScheme.error),
+                      textAlign: TextAlign.center,
                     ),
                   );
                 }
@@ -180,94 +195,103 @@ class _NearbyHotelsState extends State<NearbyHotels> {
                   return Center(
                     child: Text(
                       AppLocalizations.of(context).translate('no_hotels_found'),
+                      style: theme.textTheme.bodyMedium,
                     ),
                   );
                 }
                 return ListView.builder(
                   scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
                   itemCount: nearbyHotels.length,
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
                   itemBuilder: (context, index) {
                     final hotel = nearbyHotels[index];
                     final isSaved = widget.savedPlaces.contains(hotel.id);
-                    return GestureDetector(
-                      onTap: () => widget.navigateToPlaceDetails(hotel),
-                      child: Container(
-                        width: 160,
-                        margin: const EdgeInsets.only(right: 12),
-                        child: Card(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          elevation: 4,
-                          child: Stack(
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  ClipRRect(
-                                    borderRadius: const BorderRadius.only(
-                                      topLeft: Radius.circular(15),
-                                      topRight: Radius.circular(15),
-                                    ),
-                                    child: Image.network(
-                                      hotel.imageUrl,
-                                      width: double.infinity,
-                                      height: 112,
-                                      fit: BoxFit.cover,
-                                      errorBuilder:
-                                          (context, error, stackTrace) =>
-                                      const Icon(Icons.error, size: 50),
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                      CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          hotel.name,
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 14,
-                                          ),
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 6),
+                      child: GestureDetector(
+                        onTap: () => widget.navigateToPlaceDetails(hotel),
+                        child: SizedBox(
+                          width: 160,
+                          child: Card(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            elevation: 4,
+                            child: Stack(
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: const BorderRadius.only(
+                                        topLeft: Radius.circular(15),
+                                        topRight: Radius.circular(15),
+                                      ),
+                                      child: Image.network(
+                                        hotel.imageUrl,
+                                        width: double.infinity,
+                                        height: 112,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (context, error, stackTrace) => Image.network(
+                                          'https://via.placeholder.com/400x300.png?text=No+Image',
+                                          fit: BoxFit.cover,
                                         ),
-                                        const SizedBox(height: 4),
-                                        widget.buildRatingStars(hotel.rating),
-                                        const SizedBox(height: 4),
-                                      ],
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                              Positioned(
-                                top: 8,
-                                right: 8,
-                                child: IconButton(
-                                  icon: Icon(
-                                    isSaved
-                                        ? Icons.favorite
-                                        : Icons.favorite_border,
-                                    color: isSaved
-                                        ? Colors.red
-                                        : theme.colorScheme.onSurfaceVariant,
-                                    size: 24,
-                                  ),
-                                  onPressed: () =>
-                                      widget.toggleSavedPlace(hotel.id),
-                                  style: IconButton.styleFrom(
-                                    backgroundColor: theme
-                                        .colorScheme
-                                        .surfaceContainerHighest
-                                        .withOpacity(0.8),
-                                    shape: const CircleBorder(),
+                                    Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            hotel.name,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 14,
+                                            ),
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Row(
+                                            children: [
+                                              Icon(
+                                                Icons.star,
+                                                color: Colors.amber,
+                                                size: 16,
+                                              ),
+                                              const SizedBox(width: 4),
+                                              Text(
+                                                hotel.rating.toStringAsFixed(1),
+                                                style: theme.textTheme.bodyMedium?.copyWith(
+                                                  color: theme.colorScheme.onSurfaceVariant,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Positioned(
+                                  top: 8,
+                                  right: 8,
+                                  child: IconButton(
+                                    icon: Icon(
+                                      isSaved ? Icons.favorite : Icons.favorite_border,
+                                      color: isSaved ? Colors.red : theme.colorScheme.onSurfaceVariant,
+                                      size: 24,
+                                    ),
+                                    onPressed: () => widget.toggleSavedPlace(hotel.id),
+                                    style: IconButton.styleFrom(
+                                      backgroundColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.8),
+                                      shape: const CircleBorder(),
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ),
@@ -281,4 +305,4 @@ class _NearbyHotelsState extends State<NearbyHotels> {
       ),
     );
   }
-}
+}*/

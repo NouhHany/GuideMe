@@ -29,9 +29,9 @@ class _NearbyTouristSitesScreenState extends State<NearbyTouristSitesScreen> {
   Position? _currentPosition;
   StreamSubscription<Position>? _positionStreamSubscription;
   GoogleMapController? _mapController;
-  double _currentZoom = 13.0;
+  final double _currentZoom = 13.0;
   final Set<String> _favorites = {};
-  List<bool> _filterSelections = [
+  final List<bool> _filterSelections = [
     true,
     true,
     true,
@@ -270,14 +270,14 @@ class _NearbyTouristSitesScreenState extends State<NearbyTouristSitesScreen> {
           if (response.isOkay && response.results.isNotEmpty) {
             places.addAll(
               response.results.map((result) {
-                String category = result.types?.first ?? 'unknown';
+                String category = result.types.first;
                 String subCategory = _determineSubCategory(
                   category,
-                  result.name ?? 'Unknown',
+                  result.name,
                 );
                 String? photoReference =
-                    result.photos?.isNotEmpty == true
-                        ? result.photos!.first.photoReference
+                    result.photos.isNotEmpty == true
+                        ? result.photos.first.photoReference
                         : null;
                 String imageUrl =
                     photoReference != null
@@ -287,8 +287,8 @@ class _NearbyTouristSitesScreenState extends State<NearbyTouristSitesScreen> {
                   'Adding place: ${result.name}, Category: $subCategory, Rating: ${result.rating}',
                 );
                 return Place(
-                  id: result.placeId ?? '',
-                  name: result.name ?? 'Unknown',
+                  id: result.placeId,
+                  name: result.name,
                   description: result.vicinity ?? 'No description available',
                   imageUrl: imageUrl,
                   latitude: result.geometry?.location.lat ?? 0.0,
@@ -349,22 +349,6 @@ class _NearbyTouristSitesScreenState extends State<NearbyTouristSitesScreen> {
     }
   }
 
-  bool _isValidPlaceType(List<String> types, String name) {
-    final validTypes = [
-      'tourist_attraction',
-      'shopping_mall',
-      'cafe',
-      'restaurant',
-      'lodging',
-    ];
-    final nameLower = name.toLowerCase();
-    return types.any((type) => validTypes.contains(type)) ||
-        nameLower.contains('mall') ||
-        nameLower.contains('coffee') ||
-        nameLower.contains('tourist') ||
-        nameLower.contains('hotel');
-  }
-
   String _determineSubCategory(String category, String name) {
     final nameLower = name.toLowerCase();
     if (category == 'tourist_attraction' ||
@@ -392,15 +376,19 @@ class _NearbyTouristSitesScreenState extends State<NearbyTouristSitesScreen> {
         _places.where((place) {
           if (!_filterSelections.contains(true)) return true;
           bool matches = false;
-          if (_filterSelections[0] && place.subCategory == 'Hotels')
+          if (_filterSelections[0] && place.subCategory == 'Hotels') {
             matches = true;
-          if (_filterSelections[1] && place.subCategory == 'Food & Drink')
+          }
+          if (_filterSelections[1] && place.subCategory == 'Food & Drink') {
             matches = true;
-          if (_filterSelections[2] && place.subCategory == 'Malls')
+          }
+          if (_filterSelections[2] && place.subCategory == 'Malls') {
             matches = true;
+          }
           if (_filterSelections[3] &&
-              place.subCategory == 'Historical/Cultural')
+              place.subCategory == 'Historical/Cultural') {
             matches = true;
+          }
           return matches;
         }).toList();
 

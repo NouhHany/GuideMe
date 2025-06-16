@@ -21,7 +21,7 @@ class WikiSummary {
     if (json['extract'] != null) {
       final extract = json['extract'].toString();
       // Example: Parse height, architect, etc., from extract (heuristic-based)
-      final heightMatch = RegExp(r'Height:?\s*([\d\s\w]+)').firstMatch(extract);
+      final heightMatch = RegExp(r'Height:?\s*([\s\w]+)').firstMatch(extract);
       final architectMatch = RegExp(
         r'Architect:?\s*([^\n]+)',
       ).firstMatch(extract);
@@ -33,16 +33,21 @@ class WikiSummary {
         r'Collection size:?\s*([^\n]+)',
       ).firstMatch(extract);
 
-      if (heightMatch != null)
+      if (heightMatch != null) {
         metadata['height'] = heightMatch.group(1)?.trim();
-      if (architectMatch != null)
+      }
+      if (architectMatch != null) {
         metadata['architect'] = architectMatch.group(1)?.trim();
-      if (directorMatch != null)
+      }
+      if (directorMatch != null) {
         metadata['director'] = directorMatch.group(1)?.trim();
-      if (builtMatch != null)
+      }
+      if (builtMatch != null) {
         metadata['date_built'] = builtMatch.group(1)?.trim();
-      if (collectionMatch != null)
+      }
+      if (collectionMatch != null) {
         metadata['collection_size'] = collectionMatch.group(1)?.trim();
+      }
     }
 
     return WikiSummary(

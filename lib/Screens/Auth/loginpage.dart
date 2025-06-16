@@ -1,12 +1,9 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:guideme/core/root_navigator.dart';
-import 'package:jwt_decoder/jwt_decoder.dart';
 
 import '../../Decorations/BackgroundPainter.dart';
 import 'registerpage.dart';
@@ -67,7 +64,7 @@ class _MessageOverlay extends StatelessWidget {
 }
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  const LoginScreen({super.key});
 
   @override
   _LoginScreenState createState() => _LoginScreenState();
@@ -150,7 +147,6 @@ class _LoginScreenState extends State<LoginScreen> {
       final User? user = userCredential.user;
 
       if (user != null) {
-        print('User signed in: ${user.email}, UID: ${user.uid}');
         final String name = user.displayName ?? 'Unknown';
         final String userEmail = user.email ?? email;
 
@@ -170,7 +166,6 @@ class _LoginScreenState extends State<LoginScreen> {
         }
       }
     } on FirebaseAuthException catch (e) {
-      print('FirebaseAuthException: ${e.code} - ${e.message}');
       setState(() {
         switch (e.code) {
           case 'user-not-found':
@@ -189,9 +184,7 @@ class _LoginScreenState extends State<LoginScreen> {
             _showMessageOverlay('Unable to log in. Please try again.');
         }
       });
-    } catch (e, stackTrace) {
-      print('Unexpected error during login: $e');
-      print('Stack trace: $stackTrace');
+    } catch (e) {
       _showMessageOverlay('An unexpected issue occurred. Please try again.');
     }
   }
@@ -200,7 +193,6 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser == null) {
-        print('Google Sign-In canceled by user');
         _showMessageOverlay('Google Sign-In was canceled.');
         return;
       }
@@ -215,9 +207,8 @@ class _LoginScreenState extends State<LoginScreen> {
       final User? user = userCredential.user;
 
       if (user != null) {
-        print('Google User signed in: ${user.email}, UID: ${user.uid}');
         final String name = user.displayName ?? googleUser.displayName ?? 'Unknown';
-        final String userEmail = user.email ?? googleUser.email ?? 'Unknown';
+        final String userEmail = user.email ?? googleUser.email;
 
         if (mounted) {
           _showMessageOverlay('Signed in with Google successfully! Redirecting...', isError: false);
@@ -234,9 +225,7 @@ class _LoginScreenState extends State<LoginScreen> {
           );
         }
       }
-    } catch (e, stackTrace) {
-      print('Error during Google Sign-In: $e');
-      print('Stack trace: $stackTrace');
+    } catch (e) {
       _showMessageOverlay('Unable to sign in with Google. Please try again.');
     }
   }

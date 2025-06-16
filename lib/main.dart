@@ -1,17 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:provider/provider.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:http/http.dart' as http;
-import 'firebase_options.dart'; // Ensure this file exists
+import 'package:provider/provider.dart';
+
 import 'Screens/Auth/loginpage.dart';
 import 'core/AppLocalizations.dart';
 import 'core/AppState.dart';
 import 'core/root_navigator.dart';
+import 'firebase_options.dart'; // Ensure this file exists
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,11 +19,10 @@ void main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-    print('Firebase initialized successfully');
-    FirebaseFirestore.instance.settings = const Settings(persistenceEnabled: true);
-  } catch (e, stackTrace) {
-    print('Error initializing Firebase: $e');
-    print('Stack trace: $stackTrace');
+    FirebaseFirestore.instance.settings = const Settings(
+      persistenceEnabled: true,
+    );
+  } catch (e) {
     // Fallback: If initialization fails, proceed without Firestore persistence
   }
   final appState = AppState();
@@ -42,7 +41,8 @@ class MyApp extends StatelessWidget {
           title: 'GuideMe',
           theme: ThemeData(
             primarySwatch: Colors.blue,
-            brightness: appState.isDarkMode ? Brightness.dark : Brightness.light,
+            brightness:
+                appState.isDarkMode ? Brightness.dark : Brightness.light,
             elevatedButtonTheme: ElevatedButtonThemeData(
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFD4B087),
@@ -101,27 +101,22 @@ class _AuthWrapperState extends State<AuthWrapper> {
     try {
       final storage = FlutterSecureStorage();
       final token = await storage.read(key: 'token');
-      print('Token from FlutterSecureStorage: ${token ?? 'null'}');
 
       if (token != null) {
         bool isExpired = JwtDecoder.isExpired(token);
-        print('Is token expired? $isExpired');
         if (!isExpired) {
           final decodedToken = JwtDecoder.decode(token);
-          print('Decoded token claims: $decodedToken');
           setState(() {
             _userName = decodedToken['unique_name'] ?? 'Unknown';
             _userEmail = decodedToken['email'] ?? 'Unknown';
             _isLoading = false;
           });
         } else {
-          print('Token is expired, clearing token');
           await storage.delete(key: 'token');
           setState(() => _isLoading = false);
         }
       } else {
         final user = _auth.currentUser;
-        print('Firebase current user: ${user?.email ?? 'null'}, UID: ${user?.uid ?? 'null'}');
         if (user != null) {
           setState(() {
             _userName = user.displayName ?? 'Unknown';
@@ -129,13 +124,10 @@ class _AuthWrapperState extends State<AuthWrapper> {
             _isLoading = false;
           });
         } else {
-          print('No token or Firebase user found');
           setState(() => _isLoading = false);
         }
       }
-    } catch (e, stackTrace) {
-      print('Error in _checkAuthStatus: $e');
-      print('Stack trace: $stackTrace');
+    } catch (e) {
       setState(() => _isLoading = false);
     }
   }
@@ -147,11 +139,13 @@ class _AuthWrapperState extends State<AuthWrapper> {
     }
 
     if (_userName != null && _userEmail != null) {
-      print('Navigating to RootNavigator with user: $_userName, $_userEmail');
-      return RootNavigator(userName: _userName!, userEmail: _userEmail!, userPhone: null);
+      return RootNavigator(
+        userName: _userName!,
+        userEmail: _userEmail!,
+        userPhone: null,
+      );
     }
 
-    print('Navigating to LoginScreen');
     return const LoginScreen();
   }
 }

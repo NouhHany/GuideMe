@@ -1,4 +1,4 @@
-import 'dart:convert';
+
 
 class Place {
   final String id;
@@ -55,60 +55,84 @@ class Place {
 
   factory Place.fromJson(Map<String, dynamic> json, {String? apiKey}) {
     bool isValidUrl(String? url) =>
-        url != null && url.isNotEmpty && (url.startsWith('http://') || url.startsWith('https://'));
+        url != null &&
+        url.isNotEmpty &&
+        (url.startsWith('http://') || url.startsWith('https://'));
 
     return Place(
       id: json['id']?.toString() ?? json['place_id']?.toString() ?? '',
       placeId: json['place_id']?.toString(),
       name: json['name']?.toString() ?? 'Unknown',
-      description: json['editorial_summary']?['overview']?.toString() ??
+      description:
+          json['editorial_summary']?['overview']?.toString() ??
           json['description']?.toString() ??
           'No description available',
-      imageUrl: (json['photos'] != null && json['photos'].isNotEmpty && apiKey != null)
-          ? 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${json['photos'][0]['photo_reference']}&key=$apiKey'
-          : isValidUrl(json['imageUrl']) ? json['imageUrl'] : '',
-      latitude: (json['geometry']?['location']?['lat'] is num
-          ? json['geometry']['location']['lat']
-          : json['latitude'] is num
-          ? json['latitude']
-          : 0)
-          .toDouble(),
-      longitude: (json['geometry']?['location']?['lng'] is num
-          ? json['geometry']['location']['lng']
-          : json['longitude'] is num
-          ? json['longitude']
-          : 0)
-          .toDouble(),
-      category: json['types']?.isNotEmpty == true
-          ? json['types'][0].toString().replaceAll('_', ' ').toLowerCase()
-          : json['category']?.toString() ?? 'Unknown',
+      imageUrl:
+          (json['photos'] != null &&
+                  json['photos'].isNotEmpty &&
+                  apiKey != null)
+              ? 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${json['photos'][0]['photo_reference']}&key=$apiKey'
+              : isValidUrl(json['imageUrl'])
+              ? json['imageUrl']
+              : '',
+      latitude:
+          (json['geometry']?['location']?['lat'] is num
+                  ? json['geometry']['location']['lat']
+                  : json['latitude'] is num
+                  ? json['latitude']
+                  : 0)
+              .toDouble(),
+      longitude:
+          (json['geometry']?['location']?['lng'] is num
+                  ? json['geometry']['location']['lng']
+                  : json['longitude'] is num
+                  ? json['longitude']
+                  : 0)
+              .toDouble(),
+      category:
+          json['types']?.isNotEmpty == true
+              ? json['types'][0].toString().replaceAll('_', ' ').toLowerCase()
+              : json['category']?.toString() ?? 'Unknown',
       rating: (json['rating'] is num ? json['rating'] : 0).toDouble(),
-      userRatingsTotal: json['user_ratings_total'] is num ? json['user_ratings_total'] : null,
-      constructionHistory: json['constructionHistory']?.toString() ??
+      userRatingsTotal:
+          json['user_ratings_total'] is num ? json['user_ratings_total'] : null,
+      constructionHistory:
+          json['constructionHistory']?.toString() ??
           json['construction_history']?.toString() ??
           json['history']?.toString() ??
           'Unknown',
       era: json['era']?.toString() ?? json['period']?.toString() ?? 'Unknown',
-      builder: json['builder']?.toString() ?? json['architect']?.toString() ?? 'Unknown',
-      imageUrls: (json['photos'] as List<dynamic>?)
-          ?.map((photo) => apiKey != null
-          ? 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${photo['photo_reference']}&key=$apiKey'
-          : '')
-          .where(isValidUrl)
-          .toList() ??
+      builder:
+          json['builder']?.toString() ??
+          json['architect']?.toString() ??
+          'Unknown',
+      imageUrls:
+          (json['photos'] as List<dynamic>?)
+              ?.map(
+                (photo) =>
+                    apiKey != null
+                        ? 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${photo['photo_reference']}&key=$apiKey'
+                        : '',
+              )
+              .where(isValidUrl)
+              .toList() ??
           (json['imageUrls'] as List<dynamic>?)
               ?.whereType<String>()
               .where(isValidUrl)
               .toList() ??
           [],
       audioUrl: json['audioUrl']?.toString() ?? '',
-      indoorMap: (json['indoorMap'] as List<dynamic>?)?.cast<Map<String, dynamic>>() ?? [],
+      indoorMap:
+          (json['indoorMap'] as List<dynamic>?)?.cast<Map<String, dynamic>>() ??
+          [],
       routes: Map<String, String>.from(json['routes'] ?? {}),
       subCategory: json['types']?.join(', ') ?? json['subCategory']?.toString(),
       summary: json['editorial_summary']?['overview']?.toString(),
       phoneNumber: json['formatted_phone_number']?.toString(),
       website: json['website']?.toString(),
-      openingHours: (json['opening_hours']?['weekday_text'] as List<dynamic>?)?.cast<String>(),
+      openingHours:
+          (json['opening_hours']?['weekday_text'] as List<dynamic>?)
+              ?.cast<String>(),
       businessStatus: json['business_status']?.toString(),
       types: (json['types'] as List<dynamic>?)?.cast<String>(),
     );

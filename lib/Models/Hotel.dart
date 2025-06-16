@@ -25,17 +25,17 @@ class Hotel {
       name: json['name']?.toString() ?? 'Unknown',
       rating: (json['rating'] is num ? json['rating'] : 0).toDouble(),
       userRatingsTotal:
-      json['user_ratings_total'] is num ? json['user_ratings_total'] : null,
+          json['user_ratings_total'] is num ? json['user_ratings_total'] : null,
       vicinity: json['vicinity']?.toString(),
       imageUrl:
-      (json['photos'] != null &&
-          json['photos'].isNotEmpty &&
-          apiKey != null)
-          ? 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${json['photos'][0]['photo_reference']}&key=$apiKey'
-          : null,
+          (json['photos'] != null &&
+                  json['photos'].isNotEmpty &&
+                  apiKey != null)
+              ? 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${json['photos'][0]['photo_reference']}&key=$apiKey'
+              : null,
       openingHours:
-      (json['opening_hours']?['weekday_text'] as List<dynamic>?)
-          ?.cast<String>(),
+          (json['opening_hours']?['weekday_text'] as List<dynamic>?)
+              ?.cast<String>(),
       priceLevel: json['price_level']?.toString(),
     );
   }

@@ -1,13 +1,71 @@
-import 'dart:math';
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_google_maps_webservices/places.dart';
+import 'package:webview_flutter/webview_flutter.dart';
+
 import '../../Models/Place.dart';
 import '../../Services/firestore_service.dart';
 import '../../core/AppLocalizations.dart';
-import '../Home/Home Screen/recommendations_section.dart';
 import '../Place Details/placedetails.dart';
-import 'TripCreationScreen.dart';
+
+class _MessageOverlay extends StatelessWidget {
+  final String message;
+  final bool isError;
+  final VoidCallback? onDismiss;
+
+  const _MessageOverlay({
+    required this.message,
+    required this.isError,
+    this.onDismiss,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color:
+              isError
+                  ? Colors.red.withOpacity(0.9)
+                  : Colors.green.withOpacity(0.9),
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Icon(
+              isError ? Icons.error_outline : Icons.check_circle_outline,
+              color: Colors.white,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                message,
+                style: const TextStyle(color: Colors.white, fontSize: 16),
+              ),
+            ),
+            if (onDismiss != null)
+              IconButton(
+                icon: const Icon(Icons.close, color: Colors.white),
+                onPressed: onDismiss,
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
 class FavoritesScreen extends StatefulWidget {
   const FavoritesScreen({super.key});
@@ -20,13 +78,17 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   List<Place> _favoritePlaces = [];
   Set<String> _savedPlaceIds = {};
   bool _listView = false;
+  bool _isChatbotExpanded = false;
   final ScrollController _controller = ScrollController();
   final ScrollController _gridController = ScrollController();
   final GoogleMapsPlaces placesApi = GoogleMapsPlaces(
     apiKey: 'AIzaSyD3iQPOazh9GfAOl44Y9kDHDJ0zyNqARSA',
   );
-  List<Map<String, dynamic>> _userTrips = [];
   late FirestoreService _firestoreService;
+  late final WebViewController _webViewController;
+  bool _isChatbotLoading = true;
+  String _chatbotErrorMessage = '';
+  OverlayEntry? _overlayEntry;
 
   @override
   void initState() {
@@ -36,50 +98,149 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
       _firestoreService = FirestoreService(userId: user.uid);
       _loadFavoritePlaces();
     } else {
-      _showSnackBar('Please sign in to view favorites.');
+      _showMessageOverlay('Please sign in to view favorites.');
     }
+
+    _webViewController =
+        WebViewController()
+          ..setJavaScriptMode(JavaScriptMode.unrestricted)
+          ..setBackgroundColor(const Color(0x00000000))
+          ..setNavigationDelegate(
+            NavigationDelegate(
+              onProgress: (int progress) {
+                if (progress == 100) {
+                  setState(() {
+                    _isChatbotLoading = false;
+                  });
+                }
+              },
+              onPageStarted: (String url) {},
+              onPageFinished: (String url) {
+                setState(() {
+                  _isChatbotLoading = false;
+                });
+                _webViewController.runJavaScript('''
+              document.getElementById('webchat').style.overflow = 'auto';
+              document.body.style.overflow = 'auto';
+            ''');
+              },
+              onWebResourceError: (WebResourceError error) {
+                setState(() {
+                  _isChatbotLoading = false;
+                  _chatbotErrorMessage =
+                      'Error: ${error.description} (Code: ${error.errorCode})';
+                });
+              },
+              onNavigationRequest: (NavigationRequest request) {
+                return NavigationDecision.navigate;
+              },
+            ),
+          )
+          ..loadHtmlString('''
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <style>
+            body {
+              background-color: transparent;
+              margin: 0;
+              padding: 0;
+              overflow: auto;
+            }
+            #webchat {
+              background-color: transparent !important;
+              width: 100%;
+              height: 100%;
+              overflow: auto;
+            }
+          </style>
+        </head>
+        <body>
+          <div id="webchat"></div>
+          <script src="https://cdn.botpress.cloud/webchat/v3.0/inject.js" defer></script>
+          <script src="https://files.bpcontent.cloud/2025/06/16/00/20250616002527-C8N12KER.js" defer></script>
+          <script>
+            window.botpressWebChat.init({
+              "composerPlaceholder": "Ask about your Egypt trip...",
+              "botConversationDescription": "Plan your Egypt adventure!",
+              "hostUrl": "https://cdn.botpress.cloud/webchat/v3.0",
+              "messagingUrl": "https://messaging.botpress.cloud",
+              "stylesheet": "https://cdn.botpress.cloud/webchat/v3.0/inject.css",
+              "backgroundColor": "transparent"
+            });
+          </script>
+        </body>
+        </html>
+      ''');
   }
 
   @override
   void dispose() {
     _controller.dispose();
     _gridController.dispose();
+    _overlayEntry?.remove();
     super.dispose();
+  }
+
+  void _showMessageOverlay(String message, {bool isError = true}) {
+    _overlayEntry?.remove();
+    _overlayEntry = OverlayEntry(
+      builder:
+          (context) => Positioned(
+            top: 50,
+            left: 16,
+            right: 16,
+            child: _MessageOverlay(
+              message: message,
+              isError: isError,
+              onDismiss: () {
+                _overlayEntry?.remove();
+                _overlayEntry = null;
+              },
+            ),
+          ),
+    );
+    Overlay.of(context).insert(_overlayEntry!);
+    Timer(const Duration(seconds: 3), () {
+      _overlayEntry?.remove();
+      _overlayEntry = null;
+    });
   }
 
   Future<void> _loadFavoritePlaces() async {
     try {
       final places = await _firestoreService.getFavoritePlaces().first;
-      print('Loaded favorite places: ${places.map((p) => p.name).toList()}');
       setState(() {
         _favoritePlaces = places;
         _savedPlaceIds = places.map((place) => place.id).toSet();
       });
     } catch (e) {
-      print('Error loading favorite places: $e');
-      _showSnackBar('Error loading favorite places.');
+      _showMessageOverlay('Error loading favorite places: $e');
     }
   }
 
   Future<Place?> _fetchPlaceById(String placeId) async {
     try {
-      final response = await placesApi.getDetailsByPlaceId(placeId).timeout(Duration(seconds: 10));
-      if (response.isOkay) {
+      final response = await placesApi
+          .getDetailsByPlaceId(placeId)
+          .timeout(const Duration(seconds: 10));
+      if (response.isOkay && response.result.geometry?.location != null) {
         final result = response.result;
-        if (result.name == null || result.geometry?.location == null) {
-          print('Invalid place data for placeId: $placeId');
-          return null;
-        }
         return Place(
-          id: result.placeId ?? '',
-          name: result.name!,
+          id: result.placeId,
+          name: result.name,
           description: result.vicinity ?? 'No description available',
-          imageUrl: result.photos?.isNotEmpty == true
-              ? _getPhotoUrl(result.photos!.first.photoReference!)
-              : 'https://via.placeholder.com/400',
+          imageUrl:
+              result.photos.isNotEmpty
+                  ? _getPhotoUrl(result.photos.first.photoReference)
+                  : 'https://via.placeholder.com/400',
           latitude: result.geometry!.location.lat,
           longitude: result.geometry!.location.lng,
-          category: result.types?.isNotEmpty == true ? result.types!.first : 'tourist_attraction',
+          category:
+              result.types.isNotEmpty
+                  ? result.types.first
+                  : 'tourist_attraction',
           rating: result.rating?.toDouble() ?? 4.0,
           constructionHistory: 'Unknown',
           era: 'Unknown',
@@ -88,17 +249,15 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
           indoorMap: [],
           routes: {},
           subCategory: _determineSubCategory(
-            result.types?.isNotEmpty == true ? result.types!.first : 'unknown',
-            result.name!,
+            result.types.isNotEmpty ? result.types.first : 'unknown',
+            result.name,
           ),
           imageUrls: [],
         );
       }
-      print('Place API response not okay for placeId: $placeId, status: ${response.status}');
       return null;
     } catch (e) {
-      print('Error fetching place $placeId: $e');
-      _showSnackBar('Error fetching place details.');
+      _showMessageOverlay('Error fetching place details: $e');
       return null;
     }
   }
@@ -117,7 +276,9 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
       return 'Historical/Cultural';
     } else if (category == 'lodging' || nameLower.contains('hotel')) {
       return 'Hotels';
-    } else if (category == 'cafe' || category == 'restaurant' || nameLower.contains('coffee')) {
+    } else if (category == 'cafe' ||
+        category == 'restaurant' ||
+        nameLower.contains('coffee')) {
       return 'Food & Drink';
     } else if (category == 'shopping_mall' || nameLower.contains('mall')) {
       return 'Malls';
@@ -129,35 +290,20 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     try {
       final place = await _fetchPlaceById(placeId);
       if (place == null) {
-        _showSnackBar('Could not find place details.');
+        _showMessageOverlay('Could not find place details.');
         return;
       }
       if (_savedPlaceIds.contains(placeId)) {
         await _firestoreService.removeFavoritePlace(placeId);
-        _showSnackBar('Removed from favorites.');
+        _showMessageOverlay('Removed from favorites.', isError: false);
       } else {
         await _firestoreService.saveFavoritePlace(place);
-        _showSnackBar('Added to favorites.');
+        _showMessageOverlay('Added to favorites.', isError: false);
       }
-      await _loadFavoritePlaces(); // Reload to update state
+      await _loadFavoritePlaces();
     } catch (e) {
-      print('Error toggling favorite: $e');
-      _showSnackBar('Error toggling favorite.');
+      _showMessageOverlay('Error toggling favorite: $e');
     }
-  }
-
-  void _createManualTrip() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => TripCreationScreen(
-          favoritePlaces: _favoritePlaces,
-          onTripCreated: (String tripName, List<Place> trip) {
-            _firestoreService.saveTrip(tripName, trip);
-          },
-        ),
-      ),
-    );
   }
 
   void _navigateToPlaceDetails(Place place) {
@@ -167,18 +313,18 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     );
   }
 
-  void _showSnackBar(String message) {
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
-    }
-  }
-
   Widget _buildRatingWidget(double rating) {
-    return Text(
-      rating.toStringAsFixed(1),
-      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-        color: Theme.of(context).colorScheme.onSurfaceVariant,
-      ),
+    return Row(
+      children: [
+        Icon(Icons.star, size: 16, color: Colors.amber),
+        const SizedBox(width: 4),
+        Text(
+          rating.toStringAsFixed(1),
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ],
     );
   }
 
@@ -197,7 +343,9 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(16),
+                  ),
                   child: Image.network(
                     place.imageUrl,
                     width: double.infinity,
@@ -252,12 +400,16 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                 child: IconButton(
                   icon: Icon(
                     isSaved ? Icons.favorite : Icons.favorite_border,
-                    color: isSaved ? Colors.red : theme.colorScheme.onSurfaceVariant,
+                    color:
+                        isSaved
+                            ? Colors.red
+                            : theme.colorScheme.onSurfaceVariant,
                     size: 24,
                   ),
                   onPressed: () => _toggleSavedPlace(place.id),
                   style: IconButton.styleFrom(
-                    backgroundColor: theme.colorScheme.surfaceContainerHighest.withOpacity(0.8),
+                    backgroundColor: theme.colorScheme.surfaceContainerHighest
+                        .withOpacity(0.8),
                     shape: const CircleBorder(),
                   ),
                 ),
@@ -268,15 +420,107 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     );
   }
 
+  Widget _buildChatbotSection(BuildContext context) {
+    return _isChatbotExpanded
+        ? SizedBox(
+          width: double.infinity,
+          height: MediaQuery.of(context).size.height * 0.8,
+          child: Stack(
+            children: [
+              WebViewWidget(controller: _webViewController),
+              if (_isChatbotLoading)
+                const Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      CircularProgressIndicator(),
+                      SizedBox(height: 16),
+                      Text('Loading chatbot...'),
+                    ],
+                  ),
+                ),
+              if (_chatbotErrorMessage.isNotEmpty)
+                Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        _chatbotErrorMessage,
+                        style: const TextStyle(color: Colors.red, fontSize: 16),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Chatbot failed to load. Please check your internet connection or try again later.',
+                        style: TextStyle(color: Colors.black, fontSize: 14),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+              Positioned(
+                top: 16,
+                right: 16,
+                child: IconButton(
+                  icon: const Icon(Icons.close, color: Colors.black),
+                  onPressed: () {
+                    setState(() {
+                      _isChatbotExpanded = false;
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+        )
+        : GestureDetector(
+          onTap: () {
+            setState(() {
+              _isChatbotExpanded = true;
+            });
+          },
+          child: Container(
+            width: 64,
+            height: 64,
+            margin: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: const LinearGradient(
+                colors: [Color(0xFFD4B087), Color(0xFF50C9C3)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  blurRadius: 8,
+                  offset: const Offset(2, 2),
+                ),
+                BoxShadow(
+                  color: Colors.white.withOpacity(0.2),
+                  blurRadius: 8,
+                  offset: const Offset(-2, -2),
+                ),
+              ],
+            ),
+            child: const Icon(
+              Icons.support_agent,
+              color: Colors.white,
+              size: 32,
+            ),
+          ),
+        );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final localizations = AppLocalizations.of(context)!;
+    final localizations = AppLocalizations.of(context);
     final user = FirebaseAuth.instance.currentUser;
 
     if (user == null) {
       return Scaffold(
         appBar: AppBar(title: Text(localizations.translate('Favorites'))),
-        body: const Center(child: Text('Please sign in to view favorites.')),
+        body: Center(child: Text(localizations.translate('please_sign_in'))),
       );
     }
 
@@ -284,7 +528,9 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
       appBar: AppBar(
         title: Text(
           localizations.translate('Favorites'),
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
         actions: [
           IconButton(
@@ -298,45 +544,22 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
           ),
         ],
       ),
-      body: StreamBuilder<List<Place>>(
-        stream: _firestoreService.getFavoritePlaces(),
-        builder: (context, favoritePlacesSnapshot) {
-          if (favoritePlacesSnapshot.connectionState == ConnectionState.waiting) {
-            print('Waiting for favorite places');
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (favoritePlacesSnapshot.hasError) {
-            print('Favorite places error: ${favoritePlacesSnapshot.error}');
-            return Center(child: Text('Error: ${favoritePlacesSnapshot.error}'));
-          }
-          _favoritePlaces = favoritePlacesSnapshot.data ?? [];
-          _savedPlaceIds = _favoritePlaces.map((place) => place.id).toSet();
-
-          return StreamBuilder<List<Map<String, dynamic>>>(
-            stream: _firestoreService.getTrips(),
-            builder: (context, tripsSnapshot) {
-              if (tripsSnapshot.connectionState == ConnectionState.waiting) {
-                print('Waiting for trips');
+      body: Stack(
+        children: [
+          StreamBuilder<List<Place>>(
+            stream: _firestoreService.getFavoritePlaces(),
+            builder: (context, favoritePlacesSnapshot) {
+              if (favoritePlacesSnapshot.connectionState ==
+                  ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
               }
-              if (tripsSnapshot.hasError) {
-                print('Trips error: ${tripsSnapshot.error}');
-                return Center(child: Text('Error: ${tripsSnapshot.error}'));
-              }
-              _userTrips = tripsSnapshot.data ?? [];
-              print('Trips count: ${_userTrips.length}');
-
-              if (_favoritePlaces.isEmpty && _userTrips.isEmpty) {
+              if (favoritePlacesSnapshot.hasError) {
                 return Center(
-                  child: Text(
-                    localizations.translate('no_favorite_places_yet'),
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Theme.of(context).unselectedWidgetColor,
-                    ),
-                  ),
+                  child: Text('Error: ${favoritePlacesSnapshot.error}'),
                 );
               }
+              _favoritePlaces = favoritePlacesSnapshot.data ?? [];
+              _savedPlaceIds = _favoritePlaces.map((place) => place.id).toSet();
 
               return Scrollbar(
                 thumbVisibility: false,
@@ -344,143 +567,125 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                 child: CustomScrollView(
                   controller: _controller,
                   slivers: [
-                    SliverPadding(
-                      padding: const EdgeInsets.all(12),
-                      sliver: SliverToBoxAdapter(
-                        child: ConstrainedBox(
-                          constraints: BoxConstraints(
-                            maxHeight: MediaQuery.of(context).size.height * 0.45,
-                          ),
+                    if (_favoritePlaces.isNotEmpty)
+                      SliverPadding(
+                        padding: const EdgeInsets.all(12),
+                        sliver: SliverToBoxAdapter(
                           child: SingleChildScrollView(
                             controller: _gridController,
                             physics: const ClampingScrollPhysics(),
-                            child: _listView
-                                ? Column(
-                              children: List.generate(
-                                _favoritePlaces.length,
-                                    (index) {
-                                  final place = _favoritePlaces[index];
-                                  return Padding(
-                                    padding: const EdgeInsets.symmetric(vertical: 4.0),
-                                    child: ListTile(
-                                      contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-                                      leading: ClipRRect(
-                                        borderRadius: BorderRadius.circular(8),
-                                        child: Image.network(
-                                          place.imageUrl,
-                                          width: 50,
-                                          height: 50,
-                                          fit: BoxFit.cover,
-                                          errorBuilder: (context, error, stackTrace) =>
-                                          const Icon(Icons.error),
-                                        ),
+                            child:
+                                _listView
+                                    ? Column(
+                                      children: List.generate(
+                                        _favoritePlaces.length,
+                                        (index) {
+                                          final place = _favoritePlaces[index];
+                                          return Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                              vertical: 4.0,
+                                            ),
+                                            child: ListTile(
+                                              contentPadding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 8,
+                                                  ),
+                                              leading: ClipRRect(
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                                child: Image.network(
+                                                  place.imageUrl,
+                                                  width: 50,
+                                                  height: 50,
+                                                  fit: BoxFit.cover,
+                                                  errorBuilder:
+                                                      (
+                                                        context,
+                                                        error,
+                                                        stackTrace,
+                                                      ) => const Icon(
+                                                        Icons.error,
+                                                      ),
+                                                ),
+                                              ),
+                                              title: Text(
+                                                place.name,
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                              subtitle: _buildRatingWidget(
+                                                place.rating,
+                                              ),
+                                              trailing: IconButton(
+                                                icon: Icon(
+                                                  _savedPlaceIds.contains(
+                                                        place.id,
+                                                      )
+                                                      ? Icons.favorite
+                                                      : Icons.favorite_border,
+                                                  color:
+                                                      _savedPlaceIds.contains(
+                                                            place.id,
+                                                          )
+                                                          ? Colors.red
+                                                          : Colors.grey,
+                                                ),
+                                                onPressed:
+                                                    () => _toggleSavedPlace(
+                                                      place.id,
+                                                    ),
+                                              ),
+                                              onTap:
+                                                  () => _navigateToPlaceDetails(
+                                                    place,
+                                                  ),
+                                            ),
+                                          );
+                                        },
                                       ),
-                                      title: Text(
-                                        place.name,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      subtitle: _buildRatingWidget(place.rating),
-                                      trailing: IconButton(
-                                        icon: Icon(
-                                          _savedPlaceIds.contains(place.id)
-                                              ? Icons.favorite
-                                              : Icons.favorite_border,
-                                          color: _savedPlaceIds.contains(place.id)
-                                              ? Colors.red
-                                              : Colors.grey,
-                                        ),
-                                        onPressed: () => _toggleSavedPlace(place.id),
-                                      ),
-                                      onTap: () => _navigateToPlaceDetails(place),
+                                    )
+                                    : GridView.builder(
+                                      shrinkWrap: true,
+                                      physics:
+                                          const NeverScrollableScrollPhysics(),
+                                      padding: EdgeInsets.zero,
+                                      gridDelegate:
+                                          const SliverGridDelegateWithMaxCrossAxisExtent(
+                                            maxCrossAxisExtent: 160,
+                                            mainAxisSpacing: 12,
+                                            crossAxisSpacing: 12,
+                                            childAspectRatio: 160 / 260,
+                                          ),
+                                      itemCount: _favoritePlaces.length,
+                                      itemBuilder: (context, index) {
+                                        return _buildPlaceCard(
+                                          _favoritePlaces[index],
+                                        );
+                                      },
                                     ),
-                                  );
-                                },
-                              ),
-                            )
-                                : GridView.builder(
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              padding: EdgeInsets.zero,
-                              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                                maxCrossAxisExtent: 160,
-                                mainAxisSpacing: 12,
-                                crossAxisSpacing: 12,
-                                childAspectRatio: 160 / 260,
-                              ),
-                              itemCount: _favoritePlaces.length,
-                              itemBuilder: (context, index) {
-                                return _buildPlaceCard(_favoritePlaces[index]);
-                              },
-                            ),
                           ),
                         ),
                       ),
-                    ),
                     SliverPadding(
-                      padding: const EdgeInsets.fromLTRB(16.0, 20.0, 16.0, 10.0),
-                      sliver: SliverToBoxAdapter(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              localizations.translate('your_trips'),
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleLarge
-                                  ?.copyWith(fontWeight: FontWeight.bold),
-                            ),
-                            TextButton(
-                              onPressed: _createManualTrip,
-                              child: Text(
-                                localizations.translate('create_trip'),
-                                style: const TextStyle(color: Color(0xFFD4B087)),
-                              ),
-                            ),
-                          ],
-                        ),
+                      padding: EdgeInsets.only(
+                        bottom:
+                            _isChatbotExpanded
+                                ? MediaQuery.of(context).size.height * 0.8
+                                : 100.0,
                       ),
                     ),
-                    SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                            (context, index) {
-                          final trip = _userTrips[index];
-                          final tripName = trip['name'] as String;
-                          final places = trip['places'] as List<Place>;
-                          return ExpansionTile(
-                            title: Text(
-                              tripName,
-                              style: const TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            children: [
-                              SizedBox(
-                                height: 260,
-                                child: ListView.builder(
-                                  scrollDirection: Axis.horizontal,
-                                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                                  itemCount: places.length,
-                                  itemBuilder: (context, idx) {
-                                    return Container(
-                                      width: 160,
-                                      margin: const EdgeInsets.symmetric(horizontal: 4.0),
-                                      child: _buildPlaceCard(places[idx], showFavoriteButton: false),
-                                    );
-                                  },
-                                ),
-                              ),
-                            ],
-                          );
-                        },
-                        childCount: _userTrips.length,
-                      ),
-                    ),
-                    const SliverPadding(padding: EdgeInsets.only(bottom: 40.0)),
                   ],
                 ),
               );
             },
-          );
-        },
+          ),
+          Positioned(
+            bottom: 0,
+            right: _isChatbotExpanded ? 0 : null,
+            left: _isChatbotExpanded ? 0 : null,
+            child: _buildChatbotSection(context),
+          ),
+        ],
       ),
     );
   }

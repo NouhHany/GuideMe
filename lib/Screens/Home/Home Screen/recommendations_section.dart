@@ -132,73 +132,75 @@ class RecommendationsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
-    return SliverList(
-      delegate: SliverChildListDelegate([
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16.0, 20.0, 16.0, 10.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                localizations.translate('recommended_for_you'),
-                style: Theme.of(context)
-                    .textTheme
-                    .titleLarge
-                    ?.copyWith(fontWeight: FontWeight.bold),
-              ),
-              /*TextButton(
-                onPressed: onRefresh,
-                child: Text(localizations.translate('refresh'),
-                    style: const TextStyle(color: Color(0xFFD4B087))),
-              ),*/
-            ],
-          ),
-        ),
-        if (isLoadingRecommendations)
-          const Center(
-            child: CircularProgressIndicator(),
-          )
-        else if (recommendedPlaces.isNotEmpty)
+    final theme = Theme.of(context);
+
+    return SliverToBoxAdapter(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
           Padding(
-            padding: const EdgeInsets.all(12),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                maxHeight: 260,
-              ),
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                physics: const ClampingScrollPhysics(),
-                child: Row(
-                  children: List.generate(
-                    recommendedPlaces.length,
-                        (index) => Container(
-                      width: 160,
-                      margin: const EdgeInsets.symmetric(horizontal: 6),
-                      child: _buildPlaceCard(
-                        context,
-                        recommendedPlaces[index],
-                        recommendationReasons[index],
-                      ),
-                    ),
+            padding: const EdgeInsets.fromLTRB(16.0, 20.0, 16.0, 12.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  localizations.translate('recommended_for_you'),
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.onSurface,
                   ),
                 ),
-              ),
-            ),
-          )
-        else
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Text(
-              favoritePlaces.isEmpty
-                  ? localizations.translate('add_favorites_to_get_recommendations')
-                  : localizations.translate('no_recommendations_available_try_refresh'),
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-              textAlign: TextAlign.center,
+                /*TextButton(
+                  onPressed: onRefresh,
+                  child: Text(
+                    localizations.translate('refresh'),
+                    style: const TextStyle(color: Color(0xFFD4B087)),
+                  ),
+                ),*/
+              ],
             ),
           ),
-      ]),
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxHeight: 260),
+            child: isLoadingRecommendations
+                ? const Center(child: CircularProgressIndicator())
+                : recommendedPlaces.isNotEmpty
+                ? PageView.builder(
+              itemCount: recommendedPlaces.length,
+              padEnds: false,
+              pageSnapping: true,
+              controller: PageController(
+                viewportFraction: 0.45, // Shows ~2.2 cards at a time
+                initialPage: 0,
+              ),
+              itemBuilder: (context, index) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  child: Container(
+                    width: 160,
+                    child: _buildPlaceCard(
+                      context,
+                      recommendedPlaces[index],
+                      recommendationReasons[index],
+                    ),
+                  ),
+                );
+              },
+            )
+                : Center(
+              child: Text(
+                favoritePlaces.isEmpty
+                    ? localizations.translate('add_favorites_to_get_recommendations')
+                    : localizations.translate('no_recommendations_available_try_refresh'),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -1,16 +1,21 @@
 import 'dart:convert';
+
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
-import 'package:flutter/material.dart';
 
-import 'wiki_summary.dart';
 import '../core/AppState.dart'; // Import AppState to access language code
+import 'wiki_summary.dart';
 
-Future<WikiSummary> fetchWikipediaSummary(BuildContext context, String placeName) async {
+Future<WikiSummary> fetchWikipediaSummary(
+  BuildContext context,
+  String placeName,
+) async {
   try {
     // Get the current language code from AppState
     final appState = Provider.of<AppState>(context, listen: false);
-    final languageCode = appState.languageCode ?? 'en'; // Default to English if null
+    final languageCode =
+        appState.languageCode; // Default to English if null
 
     // Step 1: Search Wikipedia for the place using the selected language
     final searchUrl = Uri.parse(
@@ -27,7 +32,9 @@ Future<WikiSummary> fetchWikipediaSummary(BuildContext context, String placeName
     final searchData = jsonDecode(searchResponse.body);
     if (searchData['query']?['search'] == null ||
         searchData['query']['search'].isEmpty) {
-      throw Exception('No Wikipedia results found for "$placeName" in $languageCode');
+      throw Exception(
+        'No Wikipedia results found for "$placeName" in $languageCode',
+      );
     }
 
     // Get the top result's title

@@ -128,19 +128,6 @@ class _PlaceDetailsScreenState extends State<PlaceDetailsScreen>
   }
 
   // Function to launch Google Maps for directions
-  Future<void> _launchDirections() async {
-    final lat = widget.place.latitude;
-    final lng = widget.place.longitude;
-    final url = 'https://www.google.com/maps/dir/?api=1&destination=$lat,$lng';
-
-    if (await canLaunch(url)) {
-      await launch(url);
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Could not open Google Maps')),
-      );
-    }
-  }
 
   void _moveCameraToPlace() {
     if (_mapController != null) {

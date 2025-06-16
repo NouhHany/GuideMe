@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -51,7 +50,7 @@ class _MessageOverlay extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: isError ? Colors.red.withOpacity(0.9) : Colors.green.withOpacity(0.9),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(12), // Aligned with other screens
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.2),
@@ -117,7 +116,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   String? _currentPasswordError;
   String? _newPasswordError;
   OverlayEntry? _overlayEntry;
-  final _storage = const FlutterSecureStorage();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
@@ -248,7 +246,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     } catch (e) {
       if (mounted) {
         _showMessageOverlay(
-          AppLocalizations.of(context).translate('failed_to_load_user_data') ?? 'Unable to load user data. Please try again.',
+          AppLocalizations.of(context).translate('failed_to_load_user_data'),
         );
       }
     }
@@ -259,28 +257,34 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     return regex.hasMatch(password);
   }
 
+  bool _validatePhoneNumber(String phone) {
+    if (phone.isEmpty) return false;
+    final normalizedPhone = phone.startsWith('+') ? phone : '+${phone.replaceAll(RegExp(r'^0+'), '')}';
+    return normalizedPhone.startsWith(_selectedCountry.dialCode) &&
+        RegExp(r'^\+?[1-9]\d{1,14}$').hasMatch(normalizedPhone);
+  }
+
   Future<void> _saveProfile() async {
     setState(() {
       _isLoading = true;
       _nameError = _nameController.text.trim().isEmpty
-          ? AppLocalizations.of(context).translate('name_required') ?? 'Please enter your name.'
+          ? AppLocalizations.of(context).translate('name_required')
           : null;
       _emailError = _emailController.text.trim().isEmpty
-          ? AppLocalizations.of(context).translate('email_required') ?? 'Please enter your email.'
-          : !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(_emailController.text.trim())
-          ? AppLocalizations.of(context).translate('invalid_email') ?? 'The email format is incorrect.'
+          ? AppLocalizations.of(context).translate('email_required')
+          : !RegExp(r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(_emailController.text.trim())
+          ? AppLocalizations.of(context).translate('invalid_email')
           : null;
       _phoneError = _phoneController.text.trim().isEmpty
-          ? AppLocalizations.of(context).translate('phone_required') ?? 'Please enter your phone number.'
-          : !RegExp(r'^\+?[1-9]\d{1,14}$').hasMatch(_phoneController.text.trim())
-          ? AppLocalizations.of(context).translate('invalid_phone') ?? 'The phone number format is incorrect.'
+          ? AppLocalizations.of(context).translate('phone_required')
+          : !_validatePhoneNumber(_phoneController.text.trim())
+          ? AppLocalizations.of(context).translate('invalid_phone')
           : null;
       _currentPasswordError = _newPasswordController.text.isNotEmpty && _currentPasswordController.text.isEmpty
-          ? AppLocalizations.of(context).translate('current_password_required') ?? 'Please enter your current password.'
+          ? AppLocalizations.of(context).translate('current_password_required')
           : null;
       _newPasswordError = _newPasswordController.text.isNotEmpty && !_validatePassword(_newPasswordController.text)
-          ? AppLocalizations.of(context).translate('weak_password') ??
-          'Password must include at least 6 characters, one uppercase letter, one lowercase letter, one number, and one special character (*!@#).'
+          ? AppLocalizations.of(context).translate('weak_password')
           : null;
     });
 
@@ -306,7 +310,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         await user.updatePassword(_newPasswordController.text);
         if (!mounted) return;
         _showMessageOverlay(
-          AppLocalizations.of(context).translate('password_updated') ?? 'Password updated successfully!',
+          AppLocalizations.of(context).translate('password_updated'),
           isError: false,
         );
       }
@@ -328,38 +332,43 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
       if (!mounted) return;
       _showMessageOverlay(
-        AppLocalizations.of(context).translate('profile_updated') ?? 'Profile updated successfully!',
+        AppLocalizations.of(context).translate('profile_updated'),
         isError: false,
       );
       Navigator.pop(context);
     } catch (e) {
       if (!mounted) return;
-      String errorMessage = AppLocalizations.of(context).translate('profile_update_failed') ?? 'Unable to update profile. Please try again.';
+      String errorMessage = AppLocalizations.of(context).translate('profile_update_failed');
       if (e is FirebaseAuthException) {
         switch (e.code) {
           case 'wrong-password':
             setState(() {
               _currentPasswordError =
-                  AppLocalizations.of(context).translate('wrong_current_password') ?? 'The current password is incorrect.';
+                  AppLocalizations.of(context).translate('wrong_current_password');
             });
             break;
           case 'weak-password':
             setState(() {
               _newPasswordError =
-                  AppLocalizations.of(context).translate('weak_password') ?? 'The new password is too weak.';
+                  AppLocalizations.of(context).translate('weak_password');
             });
             break;
           case 'requires-recent-login':
             errorMessage =
-                AppLocalizations.of(context).translate('requires_recent_login') ?? 'Please log in again to update your profile.';
+                AppLocalizations.of(context).translate('requires_recent_login');
             break;
           case 'invalid-email':
             setState(() {
-              _emailError = AppLocalizations.of(context).translate('invalid_email') ?? 'The email format is incorrect.';
+              _emailError = AppLocalizations.of(context).translate('invalid_email');
+            });
+            break;
+          case 'email-already-in-use':
+            setState(() {
+              _emailError = AppLocalizations.of(context).translate('email_already_in_use');
             });
             break;
           default:
-            errorMessage = AppLocalizations.of(context).translate('profile_update_failed') ?? 'Unable to update profile. Please try again.';
+            errorMessage = AppLocalizations.of(context).translate('profile_update_failed');
         }
       }
       if (errorMessage.isNotEmpty) {
@@ -375,9 +384,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Future<void> _resetPassword() async {
-    final TextEditingController _resetEmailController = TextEditingController(text: _emailController.text);
-    String? _resetEmailError;
-    bool _isDialogLoading = false;
+    final TextEditingController resetEmailController = TextEditingController(text: _emailController.text);
+    String? resetEmailError;
+    bool isDialogLoading = false;
 
     return showDialog(
       context: context,
@@ -385,18 +394,21 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
-              title: Text(AppLocalizations.of(context).translate('forgot_password') ?? 'Forgot Password'),
+              title: Text(
+                AppLocalizations.of(context).translate('forgot_password'),
+                style: const TextStyle(color: Color(0xFFD4B087)),
+              ),
               content: TextField(
-                controller: _resetEmailController,
+                controller: resetEmailController,
                 decoration: InputDecoration(
-                  labelText: AppLocalizations.of(context).translate('enter_email') ?? 'Enter your email',
-                  errorText: _resetEmailError,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
+                  labelText: AppLocalizations.of(context).translate('enter_email'),
+                  errorText: resetEmailError,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 ),
                 keyboardType: TextInputType.emailAddress,
                 onChanged: (value) {
-                  if (_resetEmailError != null && value.isNotEmpty) {
-                    setDialogState(() => _resetEmailError = null);
+                  if (resetEmailError != null && value.isNotEmpty) {
+                    setDialogState(() => resetEmailError = null);
                   }
                 },
               ),
@@ -404,55 +416,64 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 TextButton(
                   onPressed: () => Navigator.pop(context),
                   child: Text(
-                    AppLocalizations.of(context).translate('cancel') ?? 'Cancel',
+                    AppLocalizations.of(context).translate('cancel'),
                     style: const TextStyle(color: Color(0xFFD4B087)),
                   ),
                 ),
                 TextButton(
-                  onPressed: _isDialogLoading
+                  onPressed: isDialogLoading
                       ? null
                       : () async {
-                    final email = _resetEmailController.text.trim();
+                    final email = resetEmailController.text.trim();
                     if (email.isEmpty) {
                       setDialogState(() {
-                        _resetEmailError = AppLocalizations.of(context).translate('email_required') ?? 'Please enter your email.';
+                        resetEmailError = AppLocalizations.of(context).translate('email_required');
                       });
                       return;
                     }
-                    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email)) {
+                    if (!RegExp(r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email)) {
                       setDialogState(() {
-                        _resetEmailError = AppLocalizations.of(context).translate('invalid_email') ?? 'The email format is incorrect.';
+                        resetEmailError = AppLocalizations.of(context).translate('invalid_email');
                       });
                       return;
                     }
 
                     setDialogState(() {
-                      _isDialogLoading = true;
+                      isDialogLoading = true;
                     });
 
                     try {
                       await _auth.sendPasswordResetEmail(email: email);
                       if (!mounted) return;
                       _showMessageOverlay(
-                        AppLocalizations.of(context).translate('reset_email_sent') ?? 'Password reset email sent! Check your inbox.',
+                        AppLocalizations.of(context).translate('reset_email_sent'),
                         isError: false,
                       );
                       Navigator.pop(context);
                     } catch (e) {
                       if (!mounted) return;
-                      _showMessageOverlay(
-                        AppLocalizations.of(context).translate('reset_email_failed') ?? 'Unable to send reset email. Please try again.',
-                      );
+                      String errorMessage = AppLocalizations.of(context).translate('reset_email_failed');
+                      if (e is FirebaseAuthException) {
+                        switch (e.code) {
+                          case 'user-not-found':
+                            errorMessage = AppLocalizations.of(context).translate('user_not_found');
+                            break;
+                          case 'invalid-email':
+                            errorMessage = AppLocalizations.of(context).translate('invalid_email');
+                            break;
+                        }
+                      }
+                      _showMessageOverlay(errorMessage);
                     } finally {
                       setDialogState(() {
-                        _isDialogLoading = false;
+                        isDialogLoading = false;
                       });
                     }
                   },
-                  child: _isDialogLoading
+                  child: isDialogLoading
                       ? const CircularProgressIndicator(color: Color(0xFFD4B087))
                       : Text(
-                    AppLocalizations.of(context).translate('send') ?? 'Send',
+                    AppLocalizations.of(context).translate('send'),
                     style: const TextStyle(color: Color(0xFFD4B087)),
                   ),
                 ),
@@ -471,7 +492,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          localizations.translate('edit_profile') ?? 'Edit Profile',
+          localizations.translate('edit_profile'),
           style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
       ),
@@ -483,12 +504,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                localizations.translate('personal_information') ?? 'Personal Information',
+                localizations.translate('personal_information'),
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
               Text(
-                localizations.translate('name') ?? 'Name',
+                localizations.translate('name'),
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 8),
@@ -496,16 +517,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 controller: _nameController,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  hintText: localizations.translate('enter_name') ?? 'Enter your name',
+                  hintText: localizations.translate('enter_name'),
                   errorText: _nameError,
                 ),
                 validator: null,
               ),
               const SizedBox(height: 16),
               Text(
-                localizations.translate('email') ?? 'Email',
+                localizations.translate('email'),
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 8),
@@ -513,9 +534,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 controller: _emailController,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  hintText: localizations.translate('enter_email') ?? 'Enter your email',
+                  hintText: localizations.translate('enter_email'),
                   errorText: _emailError,
                 ),
                 keyboardType: TextInputType.emailAddress,
@@ -523,7 +544,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               ),
               const SizedBox(height: 16),
               Text(
-                localizations.translate('phone') ?? 'Phone Number',
+                localizations.translate('phone'),
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 8),
@@ -533,7 +554,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     width: 120,
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.grey),
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                     child: DropdownButtonHideUnderline(
                       child: DropdownButton<Country>(
@@ -544,6 +565,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                               if (_phoneController.text.isNotEmpty && _phoneController.text.startsWith(_selectedCountry.dialCode)) {
                                 String remainingNumber = _phoneController.text.substring(_selectedCountry.dialCode.length).trim();
                                 _phoneController.text = '${newValue.dialCode}$remainingNumber';
+                              } else {
+                                _phoneController.text = newValue.dialCode;
                               }
                               _selectedCountry = newValue;
                             });
@@ -571,17 +594,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       controller: _phoneController,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                        hintText: localizations.translate('enter_phone') ?? 'Enter your phone number',
+                        hintText: localizations.translate('enter_phone'),
                         errorText: _phoneError,
                       ),
                       keyboardType: TextInputType.phone,
                       onChanged: (value) {
-                        if (value.isNotEmpty && value.startsWith(_selectedCountry.dialCode)) {
-                          _phoneController.text = value;
+                        if (value.isNotEmpty && !value.startsWith(_selectedCountry.dialCode)) {
+                          _phoneController.text = _selectedCountry.dialCode + value;
                           _phoneController.selection = TextSelection.fromPosition(
-                            TextPosition(offset: value.length),
+                            TextPosition(offset: _phoneController.text.length),
                           );
                         }
                       },
@@ -592,12 +615,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               ),
               const SizedBox(height: 32),
               Text(
-                localizations.translate('change_password') ?? 'Change Password',
+                localizations.translate('change_password'),
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
               Text(
-                localizations.translate('current_password') ?? 'Current Password',
+                localizations.translate('current_password'),
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 8),
@@ -605,9 +628,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 controller: _currentPasswordController,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  hintText: localizations.translate('enter_current_password') ?? 'Enter your current password',
+                  hintText: localizations.translate('enter_current_password'),
                   errorText: _currentPasswordError,
                   suffixIcon: IconButton(
                     icon: Icon(
@@ -626,7 +649,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               ),
               const SizedBox(height: 16),
               Text(
-                localizations.translate('new_password') ?? 'New Password (Optional)',
+                localizations.translate('new_password'),
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               const SizedBox(height: 8),
@@ -634,9 +657,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 controller: _newPasswordController,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  hintText: localizations.translate('enter_new_password') ?? 'Enter your new password',
+                  hintText: localizations.translate('enter_new_password'),
                   errorText: _newPasswordError,
                   suffixIcon: IconButton(
                     icon: Icon(
@@ -659,7 +682,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 child: TextButton(
                   onPressed: _resetPassword,
                   child: Text(
-                    localizations.translate('forgot_password') ?? 'Forgot Password?',
+                    localizations.translate('forgot_password'),
                     style: const TextStyle(color: Color(0xFFD4B087)),
                   ),
                 ),
@@ -676,7 +699,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   child: _isLoading
                       ? const CircularProgressIndicator(color: Colors.black87)
                       : Text(
-                    localizations.translate('save') ?? 'Save',
+                    localizations.translate('save'),
                     style: const TextStyle(fontSize: 16, color: Colors.black87),
                   ),
                 ),

@@ -17,7 +17,8 @@ class AppLocalizations {
       'error_navigating_to_search': 'Error navigating to search: ',
       'error_navigating_to_map': 'Error navigating to map: ',
       'error_navigating_to_nearby': 'Error navigating to nearby sites: ',
-      'error_navigating_to_place_details': 'Error navigating to place details: ',
+      'error_navigating_to_place_details':
+          'Error navigating to place details: ',
       'error_loading_places': 'Error loading places',
       'error_loading_recommended_places': 'Error loading recommended places',
       'failed_to_load_places': 'Failed to load places: ',
@@ -25,7 +26,8 @@ class AppLocalizations {
       'error_loading_saved_places': 'Error loading saved places: ',
       'please_enable_location': 'Please enable location services',
       'location_permission_denied': 'Location permission denied',
-      'location_permission_permanent_denied': 'Location permission permanently denied',
+      'location_permission_permanent_denied':
+          'Location permission permanently denied',
       'error_getting_location': 'Error getting location: ',
       'name': 'Name',
       'email': 'Email',
@@ -38,7 +40,8 @@ class AppLocalizations {
       'audio_guide_language': 'Audio Guide Language',
       'notifications': 'Notifications',
       'go_premium': 'Go Premium',
-      'premium_description': 'Unlock offline maps, ad-free experience, and exclusive content with a premium subscription.',
+      'premium_description':
+          'Unlock offline maps, ad-free experience, and exclusive content with a premium subscription.',
       'subscribe': 'Subscribe',
       'premium_redirect_mock': 'Redirect to premium subscription (mock).',
       'about_app': 'About App',
@@ -65,9 +68,9 @@ class AppLocalizations {
       'Search_for_a_place': 'Search for a Place',
       'suggested_trip': 'Suggested Trip',
       'refresh': 'Refresh',
-      'your_trip': 'Your trip',
-      'your_trips': 'Your trips',
-      'create_trip': 'Create a trip',
+      'your_trip': 'Your Trip',
+      'your_trips': 'Your Trips',
+      'create_trip': 'Create Trip',
       'no_trip_yet': 'No Trip Yet',
       'Account': 'Account',
       'search_for_a_place_ellipsis': 'Search for a place...',
@@ -111,6 +114,26 @@ class AppLocalizations {
       'enter_phone': 'Enter phone number',
       'phone_required': 'Phone number is required',
       'invalid_phone': 'Invalid phone number format',
+      'no_recommendations_available_try_refresh':
+          'No recommendations available. Try refreshing.',
+      'add_favorites_to_get_recommendations':
+          'Add favorites to get recommendations',
+      'delete_place': 'Delete Place',
+      'confirm_delete_place': 'Are you sure you want to delete this place?',
+      'place_deleted': 'Place deleted successfully',
+      'error_deleting_place': 'Error deleting place',
+      'delete': 'Delete',
+      'last_seen': 'Last Seen',
+      'error_loading_last_seen': 'Error loading last seen places',
+      'your_last_seen_places': 'Your Last Seen Places',
+      'please_sign_in': 'Please sign in to access this feature',
+      'added_to_favorites': 'Added to favorites',
+      'removed_from_favorites': 'Removed from favorites',
+      'error_fetching_place': 'Error fetching place details',
+      'waiting_for_location': 'Waiting for location...',
+      'guideme': 'GuideMe',
+      'no_nearby_places_found': 'No nearby places found',
+      'error_loading_nearby_places': 'Error loading nearby places',
     },
     'ar': {
       'home': 'الرئيسية',
@@ -127,7 +150,7 @@ class AppLocalizations {
       'error_navigating_to_search': 'خطأ في الانتقال إلى البحث ',
       'error_navigating_to_map': 'خطأ في الانتقال إلى الخريطة ',
       'error_navigating_to_nearby': 'خطأ في الانتقال إلى المواقع القريبة ',
-      'error_navigating_to_place_details':' خطأ في الانتقال إلى تفاصيل المكان ',
+      'error_navigating_to_place_details': 'خطأ في الانتقال إلى تفاصيل المكان ',
       'error_loading_places': 'خطأ في تحميل الأماكن',
       'error_loading_recommended_places': 'خطأ في تحميل الأماكن الموصى بها',
       'failed_to_load_places': 'فشل في تحميل الأماكن ',
@@ -148,7 +171,8 @@ class AppLocalizations {
       'audio_guide_language': 'لغة الدليل الصوتي',
       'notifications': 'الإشعارات',
       'go_premium': 'الاشتراك المميز',
-      'premium_description': 'افتح الخرائط بدون اتصال، تجربة خالية من الإعلانات، ومحتوى حصري باشتراك مميز.',
+      'premium_description':
+          'افتح الخرائط بدون اتصال، تجربة خالية من الإعلانات، ومحتوى حصري باشتراك مميز.',
       'subscribe': 'اشترك',
       'premium_redirect_mock': 'إعادة توجيه إلى الاشتراك المميز (محاكاة).',
       'about_app': 'عن التطبيق',
@@ -215,12 +239,34 @@ class AppLocalizations {
       'wrong_current_password': 'كلمة المرور الحالية غير صحيحة',
       'weak_password': 'كلمة المرور الجديدة ضعيفة جدًا',
       'requires_recent_login': 'يرجى تسجيل الدخول مرة أخرى لتغيير كلمة المرور',
-      'reset_email_sent': 'تم إرسال بريد إعادة تعيين كلمة المرور. تحقق من بريدك الوارد.',
+      'reset_email_sent':
+          'تم إرسال بريد إعادة تعيين كلمة المرور. تحقق من بريدك الوارد.',
       'reset_email_failed': 'فشل إرسال بريد إعادة التعيين',
       'send': 'إرسال',
       'enter_phone': 'أدخل رقم الهاتف',
       'phone_required': 'رقم الهاتف مطلوب',
       'invalid_phone': 'تنسيق رقم الهاتف غير صالح',
+      'no_recommendations_available_try_refresh':
+          'لا توجد توصيات متاحة. حاول التحديث.',
+      'add_favorites_to_get_recommendations':
+          'أضف إلى المفضلة للحصول على توصيات',
+      'delete_place': 'حذف المكان',
+      'confirm_delete_place': 'هل أنت متأكد من حذف هذا المكان؟',
+      'place_deleted': 'تم حذف المكان بنجاح',
+      'error_deleting_place': 'خطأ في حذف المكان',
+      'delete': 'حذف',
+      'last_seen': 'آخر مشاهدة',
+      'error_loading_last_seen':
+          'خطأ في تحميل الأماكن التي تمت مشاهدتها مؤخرًا',
+      'your_last_seen_places': 'الأماكن التي شاهدتها مؤخرًا',
+      'please_sign_in': 'يرجى تسجيل الدخول للوصول إلى هذه الميزة',
+      'added_to_favorites': 'تم الإضافة إلى المفضلة',
+      'removed_from_favorites': 'تم الإزالة من المفضلة',
+      'error_fetching_place': 'خطأ في جلب تفاصيل المكان',
+      'waiting_for_location': 'في انتظار الموقع...',
+      'guideme': 'جايد مي',
+      'no_nearby_places_found': 'لم يتم العثور على أماكن قريبة',
+      'error_loading_nearby_places': 'خطأ في تحميل الأماكن القريبة',
     },
     'fr': {
       'home': 'Accueil',
@@ -236,16 +282,21 @@ class AppLocalizations {
       'listen_to_audio_guide': 'Écouter le guide audio',
       'error_navigating_to_search': 'Erreur de navigation vers la recherche : ',
       'error_navigating_to_map': 'Erreur de navigation vers la carte : ',
-      'error_navigating_to_nearby': 'Erreur de navigation vers les sites proches : ',
-      'error_navigating_to_place_details': 'Erreur de navigation vers les détails du lieu : ',
+      'error_navigating_to_nearby':
+          'Erreur de navigation vers les sites proches : ',
+      'error_navigating_to_place_details':
+          'Erreur de navigation vers les détails du lieu : ',
       'error_loading_places': 'Erreur de chargement des lieux',
-      'error_loading_recommended_places': 'Erreur de chargement des lieux recommandés',
+      'error_loading_recommended_places':
+          'Erreur de chargement des lieux recommandés',
       'failed_to_load_places': 'Échec du chargement des lieux : ',
       'error_saving_place': 'Erreur d\'enregistrement du lieu : ',
-      'error_loading_saved_places': 'Erreur de chargement des lieux enregistrés : ',
+      'error_loading_saved_places':
+          'Erreur de chargement des lieux enregistrés : ',
       'please_enable_location': 'Veuillez activer les services de localisation',
       'location_permission_denied': 'Autorisation de localisation refusée',
-      'location_permission_permanent_denied': 'Autorisation de localisation refusée définitivement',
+      'location_permission_permanent_denied':
+          'Autorisation de localisation refusée définitivement',
       'error_getting_location': 'Erreur de récupération de la localisation : ',
       'name': 'Nom',
       'email': 'Email',
@@ -258,9 +309,11 @@ class AppLocalizations {
       'audio_guide_language': 'Langue du guide audio',
       'notifications': 'Notifications',
       'go_premium': 'Passer en premium',
-      'premium_description': 'Débloquez les cartes hors ligne, une expérience sans publicité et du contenu exclusif avec un abonnement premium.',
+      'premium_description':
+          'Débloquez les cartes hors ligne, une expérience sans publicité et du contenu exclusif avec un abonnement premium.',
       'subscribe': 'S\'abonner',
-      'premium_redirect_mock': 'Redirection vers l\'abonnement premium (simulée).',
+      'premium_redirect_mock':
+          'Redirection vers l\'abonnement premium (simulée).',
       'about_app': 'À propos de l\'application',
       'logout': 'Déconnexion',
       'logout_confirmation': 'Confirmation de déconnexion',
@@ -302,7 +355,8 @@ class AppLocalizations {
       'recommended_for_you': 'Recommandé pour vous',
       'nearby_hotels': 'Hôtels à proximité',
       'no_hotels_found': 'Aucun hôtel trouvé',
-      'error_loading_nearby_hotels': 'Erreur de chargement des hôtels à proximité',
+      'error_loading_nearby_hotels':
+          'Erreur de chargement des hôtels à proximité',
       'auth_token_missing': 'Jeton d\'authentification manquant',
       'profile_updated': 'Profil mis à jour avec succès',
       'profile_update_failed': 'Échec de la mise à jour du profil',
@@ -324,13 +378,39 @@ class AppLocalizations {
       'password_updated': 'Mot de passe mis à jour avec succès',
       'wrong_current_password': 'Mot de passe actuel incorrect',
       'weak_password': 'Le nouveau mot de passe est trop faible',
-      'requires_recent_login': 'Veuillez vous reconnecter pour changer le mot de passe',
-      'reset_email_sent': 'Email de réinitialisation envoyé. Vérifiez votre boîte de réception.',
+      'requires_recent_login':
+          'Veuillez vous reconnecter pour changer le mot de passe',
+      'reset_email_sent':
+          'Email de réinitialisation envoyé. Vérifiez votre boîte de réception.',
       'reset_email_failed': 'Échec de l\'envoi de l\'email de réinitialisation',
       'send': 'Envoyer',
       'enter_phone': 'Entrez votre numéro de téléphone',
       'phone_required': 'Le numéro de téléphone est requis',
       'invalid_phone': 'Format de numéro de téléphone invalide',
+      'no_recommendations_available_try_refresh':
+          'Aucune recommandation disponible. Essayez de rafraîchir.',
+      'add_favorites_to_get_recommendations':
+          'Ajoutez des favoris pour obtenir des recommandations',
+      'delete_place': 'Supprimer le lieu',
+      'confirm_delete_place': 'Êtes-vous sûr de vouloir supprimer ce lieu ?',
+      'place_deleted': 'Lieu supprimé avec succès',
+      'error_deleting_place': 'Erreur lors de la suppression du lieu',
+      'delete': 'Supprimer',
+      'last_seen': 'Dernier vu',
+      'error_loading_last_seen':
+          'Erreur lors du chargement des lieux récemment vus',
+      'your_last_seen_places': 'Vos lieux récemment vus',
+      'please_sign_in':
+          'Veuillez vous connecter pour accéder à cette fonctionnalité',
+      'added_to_favorites': 'Ajouté aux favoris',
+      'removed_from_favorites': 'Retiré des favoris',
+      'error_fetching_place':
+          'Erreur lors de la récupération des détails du lieu',
+      'waiting_for_location': 'En attente de localisation...',
+      'guideme': 'GuideMe',
+      'no_nearby_places_found': 'Aucun lieu à proximité trouvé',
+      'error_loading_nearby_places':
+          'Erreur lors du chargement des lieux à proximité',
     },
     'uk': {
       'home': 'Головна',
@@ -347,15 +427,18 @@ class AppLocalizations {
       'error_navigating_to_search': 'Помилка переходу до пошуку: ',
       'error_navigating_to_map': 'Помилка переходу до карти: ',
       'error_navigating_to_nearby': 'Помилка переходу до поближчих місць: ',
-      'error_navigating_to_place_details': 'Помилка переходу до деталей місця: ',
+      'error_navigating_to_place_details':
+          'Помилка переходу до деталей місця: ',
       'error_loading_places': 'Помилка завантаження місць',
-      'error_loading_recommended_places': 'Помилка завантаження рекомендованих місць',
+      'error_loading_recommended_places':
+          'Помилка завантаження рекомендованих місць',
       'failed_to_load_places': 'Не вдалося завантажити місця: ',
       'error_saving_place': 'Помилка збереження місця: ',
       'error_loading_saved_places': 'Помилка завантаження збережених місць: ',
       'please_enable_location': 'Будь ласка, увімкніть послуги геолокації',
       'location_permission_denied': 'Дозвіл на геолокацію відхилено',
-      'location_permission_permanent_denied': 'Дозвіл на геолокацію постійно відхилено',
+      'location_permission_permanent_denied':
+          'Дозвіл на геолокацію постійно відхилено',
       'error_getting_location': 'Помилка отримання геолокації: ',
       'name': 'Ім\'я',
       'email': 'Електронна пошта',
@@ -368,9 +451,11 @@ class AppLocalizations {
       'audio_guide_language': 'Мова аудіогіда',
       'notifications': 'Сповіщення',
       'go_premium': 'Перейти на преміум',
-      'premium_description': 'Розблоковуйте офлайн-карти, досвід без реклами та ексклюзивний контент за допомогою преміум-підписки.',
+      'premium_description':
+          'Розблоковуйте офлайн-карти, досвід без реклами та ексклюзивний контент за допомогою преміум-підписки.',
       'subscribe': 'Підписатися',
-      'premium_redirect_mock': 'Перенаправлення на преміум-підписку (імітація).',
+      'premium_redirect_mock':
+          'Перенаправлення на преміум-підписку (імітація).',
       'about_app': 'Про додаток',
       'logout': 'Вихід',
       'logout_confirmation': 'Підтвердження виходу',
@@ -435,12 +520,35 @@ class AppLocalizations {
       'wrong_current_password': 'Невірний поточний пароль',
       'weak_password': 'Новий пароль занадто слабкий',
       'requires_recent_login': 'Будь ласка, увійдіть знову, щоб змінити пароль',
-      'reset_email_sent': 'Лист для скидання пароля надіслано. Перевірте свою поштову скриньку.',
+      'reset_email_sent':
+          'Лист для скидання пароля надіслано. Перевірте свою поштову скриньку.',
       'reset_email_failed': 'Не вдалося надіслати листа для скидання',
       'send': 'Надіслати',
       'enter_phone': 'Введіть номер телефону',
       'phone_required': 'Номер телефону обов\'язковий',
       'invalid_phone': 'Невірний формат номеру телефону',
+      'no_recommendations_available_try_refresh':
+          'Рекомендації недоступні. Спробуйте оновити.',
+      'add_favorites_to_get_recommendations':
+          'Додайте улюблені, щоб отримати рекомендації',
+      'delete_place': 'Видалити місце',
+      'confirm_delete_place': 'Ви впевнені, що хочете видалити це місце?',
+      'place_deleted': 'Місце успішно видалено',
+      'error_deleting_place': 'Помилка видалення місця',
+      'delete': 'Видалити',
+      'last_seen': 'Останнє переглянуте',
+      'error_loading_last_seen':
+          'Помилка завантаження останніх переглянутих місць',
+      'your_last_seen_places': 'Ваші останні переглянуті місця',
+      'please_sign_in':
+          'Будь ласка, увійдіть, щоб отримати доступ до цієї функції',
+      'added_to_favorites': 'Додано до улюблених',
+      'removed_from_favorites': 'Видалено з улюблених',
+      'error_fetching_place': 'Помилка отримання деталей місця',
+      'waiting_for_location': 'Очікування визначення місця розташування...',
+      'guideme': 'GuideMe',
+      'no_nearby_places_found': 'Поблизу не знайдено місць',
+      'error_loading_nearby_places': 'Помилка завантаження найближчих місць',
     },
     'de': {
       'home': 'Startseite',
@@ -456,8 +564,10 @@ class AppLocalizations {
       'listen_to_audio_guide': 'Audioführung anhören',
       'error_navigating_to_search': 'Fehler beim Navigieren zur Suche: ',
       'error_navigating_to_map': 'Fehler beim Navigieren zur Karte: ',
-      'error_navigating_to_nearby': 'Fehler beim Navigieren zu nahegelegenen Orten: ',
-      'error_navigating_to_place_details': 'Fehler beim Navigieren zu den Ortsdetails: ',
+      'error_navigating_to_nearby':
+          'Fehler beim Navigieren zu nahegelegenen Orten: ',
+      'error_navigating_to_place_details':
+          'Fehler beim Navigieren zu den Ortsdetails: ',
       'error_loading_places': 'Fehler beim Laden der Orte',
       'error_loading_recommended_places': 'Fehler beim Laden empfohlener Orte',
       'failed_to_load_places': 'Fehler beim Laden der Orte: ',
@@ -465,7 +575,8 @@ class AppLocalizations {
       'error_loading_saved_places': 'Fehler beim Laden gespeicherter Orte: ',
       'please_enable_location': 'Bitte aktivieren Sie die Standortdienste',
       'location_permission_denied': 'Standortberechtigung abgelehnt',
-      'location_permission_permanent_denied': 'Standortberechtigung dauerhaft abgelehnt',
+      'location_permission_permanent_denied':
+          'Standortberechtigung dauerhaft abgelehnt',
       'error_getting_location': 'Fehler beim Abrufen des Standorts: ',
       'name': 'Name',
       'email': 'E-Mail',
@@ -478,7 +589,8 @@ class AppLocalizations {
       'audio_guide_language': 'Sprache des Audioführers',
       'notifications': 'Benachrichtigungen',
       'go_premium': 'Premium erhalten',
-      'premium_description': 'Entsperren Sie Offline-Karten, werbefreie Erfahrung und exklusiven Inhalt mit einem Premium-Abonnement.',
+      'premium_description':
+          'Entsperren Sie Offline-Karten, werbefreie Erfahrung und exklusiven Inhalt mit einem Premium-Abonnement.',
       'subscribe': 'Abonnieren',
       'premium_redirect_mock': 'Weiterleitung zu Premium-Abonnement (Mock).',
       'about_app': 'Über die App',
@@ -544,13 +656,37 @@ class AppLocalizations {
       'password_updated': 'Passwort erfolgreich aktualisiert',
       'wrong_current_password': 'Aktuelles Passwort falsch',
       'weak_password': 'Das neue Passwort ist zu schwach',
-      'requires_recent_login': 'Bitte melden Sie sich erneut an, um das Passwort zu ändern',
-      'reset_email_sent': 'Passwort-Reset-E-Mail gesendet. Überprüfen Sie Ihren Posteingang.',
+      'requires_recent_login':
+          'Bitte melden Sie sich erneut an, um das Passwort zu ändern',
+      'reset_email_sent':
+          'Passwort-Reset-E-Mail gesendet. Überprüfen Sie Ihren Posteingang.',
       'reset_email_failed': 'Fehler beim Senden der Reset-E-Mail',
       'send': 'Senden',
       'enter_phone': 'Telefonnummer eingeben',
       'phone_required': 'Telefonnummer ist erforderlich',
       'invalid_phone': 'Ungültiges Telefonnummernformat',
+      'no_recommendations_available_try_refresh':
+          'Keine Empfehlungen verfügbar. Versuchen Sie zu aktualisieren.',
+      'add_favorites_to_get_recommendations':
+          'Fügen Sie Favoriten hinzu, um Empfehlungen zu erhalten',
+      'delete_place': 'Ort löschen',
+      'confirm_delete_place':
+          'Sind Sie sicher, dass Sie diesen Ort löschen möchten?',
+      'place_deleted': 'Ort erfolgreich gelöscht',
+      'error_deleting_place': 'Fehler beim Löschen des Ortes',
+      'delete': 'Löschen',
+      'last_seen': 'Zuletzt gesehen',
+      'error_loading_last_seen': 'Fehler beim Laden der zuletzt gesehenen Orte',
+      'your_last_seen_places': 'Ihre zuletzt gesehenen Orte',
+      'please_sign_in':
+          'Bitte melden Sie sich an, um auf diese Funktion zuzugreifen',
+      'added_to_favorites': 'Zu Favoriten hinzugefügt',
+      'removed_from_favorites': 'Aus Favoriten entfernt',
+      'error_fetching_place': 'Fehler beim Abrufen der Ortsdetails',
+      'waiting_for_location': 'Warten auf Standort...',
+      'guideme': 'GuideMe',
+      'no_nearby_places_found': 'Keine Orte in der Nähe gefunden',
+      'error_loading_nearby_places': 'Fehler beim Laden der Orte in der Nähe',
     },
     'ru': {
       'home': 'Главная',
@@ -569,13 +705,15 @@ class AppLocalizations {
       'error_navigating_to_nearby': 'Ошибка навигации к близлежащим местам: ',
       'error_navigating_to_place_details': 'Ошибка навигации к деталям места: ',
       'error_loading_places': 'Ошибка загрузки мест',
-      'error_loading_recommended_places': 'Ошибка загрузки рекомендованных мест',
+      'error_loading_recommended_places':
+          'Ошибка загрузки рекомендованных мест',
       'failed_to_load_places': 'Не удалось загрузить места: ',
       'error_saving_place': 'Ошибка сохранения места: ',
       'error_loading_saved_places': 'Ошибка загрузки сохраненных мест: ',
       'please_enable_location': 'Пожалуйста, включите службы геолокации',
       'location_permission_denied': 'Разрешение на геолокацию отклонено',
-      'location_permission_permanent_denied': 'Разрешение на геолокацию постоянно отклонено',
+      'location_permission_permanent_denied':
+          'Разрешение на геолокацию постоянно отклонено',
       'error_getting_location': 'Ошибка получения геолокации: ',
       'name': 'Имя',
       'email': 'Электронная почта',
@@ -588,7 +726,8 @@ class AppLocalizations {
       'audio_guide_language': 'Язык аудиогида',
       'notifications': 'Уведомления',
       'go_premium': 'Перейти на премиум',
-      'premium_description': 'Разблоковывайте оффлайн-карты, опыт без рекламы и эксклюзивный контент с помощью премиум-подписки.',
+      'premium_description':
+          'Разблоковывайте оффлайн-карты, опыт без рекламы и эксклюзивный контент с помощью премиум-подписки.',
       'subscribe': 'Подписаться',
       'premium_redirect_mock': 'Перенаправление на премиум-подписку (мок).',
       'about_app': 'О приложении',
@@ -654,20 +793,47 @@ class AppLocalizations {
       'password_updated': 'Пароль успешно обновлен',
       'wrong_current_password': 'Неверный текущий пароль',
       'weak_password': 'Новый пароль слишком слабый',
-      'requires_recent_login': 'Пожалуйста, войдите снова, чтобы изменить пароль',
-      'reset_email_sent': 'Письмо для сброса пароля отправлено. Проверьте свою почту.',
+      'requires_recent_login':
+          'Пожалуйста, войдите снова, чтобы изменить пароль',
+      'reset_email_sent':
+          'Письмо для сброса пароля отправлено. Проверьте свою почту.',
       'reset_email_failed': 'Не удалось отправить письмо для сброса',
       'send': 'Отправить',
       'enter_phone': 'Введите номер телефона',
       'phone_required': 'Номер телефона обязателен',
       'invalid_phone': 'Неверный формат номера телефона',
+      'no_recommendations_available_try_refresh':
+          'Рекомендации недоступны. Попробуйте обновить.',
+      'add_favorites_to_get_recommendations':
+          'Добавьте в избранное, чтобы получать рекомендации',
+      'delete_place': 'Удалить место',
+      'confirm_delete_place': 'Вы уверены, что хотите удалить это место?',
+      'place_deleted': 'Место успешно удалено',
+      'error_deleting_place': 'Ошибка удаления места',
+      'delete': 'Удалить',
+      'last_seen': 'Последнее посещение',
+      'error_loading_last_seen': 'Ошибка загрузки последних просмотренных мест',
+      'your_last_seen_places': 'Ваши последние просмотренные места',
+      'please_sign_in':
+          'Пожалуйста, войдите, чтобы получить доступ к этой функции',
+      'added_to_favorites': 'Добавлено в избранное',
+      'removed_from_favorites': 'Удалено из избранного',
+      'error_fetching_place': 'Ошибка получения деталей места',
+      'waiting_for_location': 'Ожидание определения местоположения...',
+      'guideme': 'GuideMe',
+      'no_nearby_places_found': 'Поблизости не найдено мест',
+      'error_loading_nearby_places': 'Ошибка загрузки ближайших мест',
     },
   };
 
-  static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
+  static const LocalizationsDelegate<AppLocalizations> delegate =
+      _AppLocalizationsDelegate();
 
   static AppLocalizations of(BuildContext context) {
-    final instance = Localizations.of<AppLocalizations>(context, AppLocalizations);
+    final instance = Localizations.of<AppLocalizations>(
+      context,
+      AppLocalizations,
+    );
     return instance ?? AppLocalizations('en');
   }
 
@@ -676,16 +842,19 @@ class AppLocalizations {
   AppLocalizations(this._locale);
 
   String translate(String key) {
-    final localizedValue = _localizedValues[_locale]?[key] ?? _localizedValues['en']?[key];
+    final localizedValue =
+        _localizedValues[_locale]?[key] ?? _localizedValues['en']?[key];
     return localizedValue ?? key;
   }
 }
 
-class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
+class _AppLocalizationsDelegate
+    extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();
 
   @override
-  bool isSupported(Locale locale) => ['en', 'ar', 'fr', 'uk', 'de', 'ru'].contains(locale.languageCode);
+  bool isSupported(Locale locale) =>
+      ['en', 'ar', 'fr', 'uk', 'de', 'ru'].contains(locale.languageCode);
 
   @override
   Future<AppLocalizations> load(Locale locale) async {

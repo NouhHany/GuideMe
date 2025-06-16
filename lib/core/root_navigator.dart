@@ -3,6 +3,7 @@ import 'package:guideme/Screens/Favorites/FavoritesScreen.dart';
 import 'package:guideme/Screens/Home/Home%20Screen/HomeScreen.dart';
 import 'package:guideme/Screens/Profile/UserProfileScreen.dart';
 import 'package:provider/provider.dart';
+
 import '../core/AppLocalizations.dart';
 import '../core/AppState.dart';
 
@@ -10,6 +11,7 @@ class RootNavigator extends StatefulWidget {
   final String? userName;
   final String? userEmail;
   final String? userPhone;
+
   const RootNavigator({
     super.key,
     this.userName,
@@ -47,7 +49,7 @@ class _RootNavigatorState extends State<RootNavigator> {
 
   @override
   Widget build(BuildContext context) {
-    final appState = Provider.of<AppState>(context);
+    Provider.of<AppState>(context);
     final localizations = AppLocalizations.of(context);
 
     return Scaffold(

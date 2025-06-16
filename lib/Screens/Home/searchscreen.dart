@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -5,8 +7,68 @@ import 'package:flutter_google_maps_webservices/places.dart';
 import 'package:guideme/Models/Place.dart';
 import 'package:guideme/Services/firestore_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import '../../core/AppLocalizations.dart';
 import '../Place Details/placedetails.dart';
+
+// MessageOverlay widget for styled messages
+class _MessageOverlay extends StatelessWidget {
+  final String message;
+  final bool isError;
+  final VoidCallback? onDismiss;
+
+  const _MessageOverlay({
+    required this.message,
+    required this.isError,
+    this.onDismiss,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color:
+              isError
+                  ? Colors.red.withOpacity(0.9)
+                  : Colors.green.withOpacity(0.9),
+          borderRadius: BorderRadius.circular(12),
+          // Consistent with other screens
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Icon(
+              isError ? Icons.error_outline : Icons.check_circle_outline,
+              color: Colors.white,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                message,
+                style: const TextStyle(color: Colors.white, fontSize: 16),
+              ),
+            ),
+            if (onDismiss != null)
+              IconButton(
+                icon: const Icon(Icons.close, color: Colors.white),
+                onPressed: onDismiss,
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
 class SearchScreen extends StatefulWidget {
   final List<Place> places;
@@ -43,6 +105,7 @@ class _SearchScreenState extends State<SearchScreen> {
   List<String> _searchHistory = [];
   bool _isLoading = false;
   String? _errorMessage;
+  OverlayEntry? _overlayEntry;
 
   @override
   void initState() {
@@ -57,7 +120,33 @@ class _SearchScreenState extends State<SearchScreen> {
   void dispose() {
     _searchController.dispose();
     widget.scrollController.removeListener(_scrollListener);
+    _overlayEntry?.remove();
     super.dispose();
+  }
+
+  void _showMessageOverlay(String message, {bool isError = true}) {
+    _overlayEntry?.remove();
+    _overlayEntry = OverlayEntry(
+      builder:
+          (context) => Positioned(
+            top: 50,
+            left: 16,
+            right: 16,
+            child: _MessageOverlay(
+              message: message,
+              isError: isError,
+              onDismiss: () {
+                _overlayEntry?.remove();
+                _overlayEntry = null;
+              },
+            ),
+          ),
+    );
+    Overlay.of(context).insert(_overlayEntry!);
+    Timer(const Duration(seconds: 3), () {
+      _overlayEntry?.remove();
+      _overlayEntry = null;
+    });
   }
 
   void _scrollListener() {}
@@ -72,7 +161,13 @@ class _SearchScreenState extends State<SearchScreen> {
         });
       }
     } catch (e) {
-      _showSnackBar('Error loading search history: $e');
+      if (mounted) {
+        _showMessageOverlay(
+          AppLocalizations.of(
+            context,
+          ).translate('error_loading_search_history'),
+        );
+      }
     }
   }
 
@@ -95,7 +190,11 @@ class _SearchScreenState extends State<SearchScreen> {
         });
       }
     } catch (e) {
-      _showSnackBar('Error saving search history: $e');
+      if (mounted) {
+        _showMessageOverlay(
+          AppLocalizations.of(context).translate('error_saving_search_history'),
+        );
+      }
     }
   }
 
@@ -110,7 +209,13 @@ class _SearchScreenState extends State<SearchScreen> {
         });
       }
     } catch (e) {
-      _showSnackBar('Error removing search history: $e');
+      if (mounted) {
+        _showMessageOverlay(
+          AppLocalizations.of(
+            context,
+          ).translate('error_removing_search_history'),
+        );
+      }
     }
   }
 
@@ -138,51 +243,61 @@ class _SearchScreenState extends State<SearchScreen> {
       );
 
       if (response.isOkay) {
-        final places = response.results.map((result) {
-          return Place(
-            id: result.placeId,
-            name: result.name,
-            description: result.vicinity ?? 'No description available',
-            imageUrl: result.photos.isNotEmpty == true
-                ? _getPhotoUrl(result.photos.first.photoReference)
-                : 'https://via.placeholder.com/400',
-            latitude: result.geometry?.location.lat ?? 0.0,
-            longitude: result.geometry?.location.lng ?? 0.0,
-            category: result.types.isNotEmpty == true
-                ? result.types.first
-                : 'tourist_attraction',
-            rating: result.rating?.toDouble() ?? 0.0,
-            constructionHistory: 'Unknown',
-            era: 'Unknown',
-            builder: 'Unknown',
-            audioUrl: '',
-            indoorMap: [],
-            routes: {},
-            subCategory: _determineSubCategory(
-              result.types.first,
-              result.name,
-            ),
-            imageUrls: [],
-          );
-        }).toList();
+        final places =
+            response.results.map((result) {
+              return Place(
+                id: result.placeId,
+                name: result.name,
+                description: result.vicinity ?? 'No description available',
+                imageUrl:
+                    result.photos.isNotEmpty == true
+                        ? _getPhotoUrl(result.photos.first.photoReference)
+                        : 'https://via.placeholder.com/400',
+                latitude: result.geometry?.location.lat ?? 0.0,
+                longitude: result.geometry?.location.lng ?? 0.0,
+                category:
+                    result.types.isNotEmpty == true
+                        ? result.types.first
+                        : 'tourist_attraction',
+                rating: result.rating?.toDouble() ?? 0.0,
+                constructionHistory: 'Unknown',
+                era: 'Unknown',
+                builder: 'Unknown',
+                audioUrl: '',
+                indoorMap: [],
+                routes: {},
+                subCategory: _determineSubCategory(
+                  result.types.first,
+                  result.name,
+                ),
+                imageUrls: [],
+              );
+            }).toList();
 
         setState(() {
           _filteredPlaces = _filterPlacesByCriteria(places);
           _isLoading = false;
-          _errorMessage = _filteredPlaces.isEmpty ? 'No places found' : null;
+          _errorMessage =
+              _filteredPlaces.isEmpty
+                  ? AppLocalizations.of(context).translate('no_places_found')
+                  : null;
         });
       } else {
         setState(() {
           _filteredPlaces = _filterPlacesByCriteria(widget.places);
           _isLoading = false;
-          _errorMessage = 'Error searching places';
+          _errorMessage = AppLocalizations.of(
+            context,
+          ).translate('error_searching_places');
         });
       }
     } catch (e) {
       setState(() {
         _filteredPlaces = _filterPlacesByCriteria(widget.places);
         _isLoading = false;
-        _errorMessage = 'Error loading your search';
+        _errorMessage = AppLocalizations.of(
+          context,
+        ).translate('error_loading_search');
       });
     }
   }
@@ -215,17 +330,22 @@ class _SearchScreenState extends State<SearchScreen> {
   List<Place> _filterPlacesByCriteria(List<Place> places) {
     final query = _searchController.text.toLowerCase();
     return places.where((place) {
-      bool matchesQuery = query.isEmpty ||
+      bool matchesQuery =
+          query.isEmpty ||
           place.name.toLowerCase().contains(query) ||
           place.description.toLowerCase().contains(query);
       bool matchesCategory =
           _selectedCategory == 'All' || place.subCategory == _selectedCategory;
-      bool matchesGovernorate = _selectedGovernorate == 'All' ||
+      bool matchesGovernorate =
+          _selectedGovernorate == 'All' ||
           place.description.toLowerCase().contains(
             _selectedGovernorate.toLowerCase(),
           );
       bool matchesRating = place.rating >= _minRating;
-      return matchesQuery && matchesCategory && matchesGovernorate && matchesRating;
+      return matchesQuery &&
+          matchesCategory &&
+          matchesGovernorate &&
+          matchesRating;
     }).toList();
   }
 
@@ -246,19 +366,17 @@ class _SearchScreenState extends State<SearchScreen> {
     if (user != null) {
       final firestoreService = FirestoreService(userId: user.uid);
       firestoreService.addRecentPlace(place).catchError((e) {
-        _showSnackBar('Error saving recent place: $e');
+        if (mounted) {
+          _showMessageOverlay(
+            AppLocalizations.of(context).translate('error_saving_recent_place'),
+          );
+        }
       });
     }
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => PlaceDetailsScreen(place: place)),
     );
-  }
-
-  void _showSnackBar(String message) {
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
-    }
   }
 
   Widget _buildRatingStars(double rating) {
@@ -335,11 +453,15 @@ class _SearchScreenState extends State<SearchScreen> {
         ),
         title: Text(
           localizations.translate('search'),
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
         actions: [
           IconButton(
-            icon: Icon(_listView ? Icons.grid_view_rounded : Icons.list_rounded),
+            icon: Icon(
+              _listView ? Icons.grid_view_rounded : Icons.list_rounded,
+            ),
             onPressed: () => setState(() => _listView = !_listView),
             tooltip: localizations.translate('toggle_view'),
           ),
@@ -347,32 +469,39 @@ class _SearchScreenState extends State<SearchScreen> {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
                 padding: const EdgeInsets.all(12.0),
                 child: TextField(
-                  style: TextStyle(color: Colors.black87),
+                  style: const TextStyle(color: Colors.black87),
                   controller: _searchController,
                   decoration: InputDecoration(
-                    hintText: localizations.translate('search_for_a_place_ellipsis'),
+                    hintText: localizations.translate(
+                      'search_for_a_place_ellipsis',
+                    ),
                     hintStyle: const TextStyle(color: Colors.black54),
                     prefixIcon: const Icon(Icons.search_rounded),
-                    suffixIcon: _searchController.text.isNotEmpty
-                        ? IconButton(
-                      icon: const Icon(Icons.clear_rounded),
-                      onPressed: () {
-                        _searchController.clear();
-                        _performSearch();
-                      },
-                    )
-                        : null,
+                    suffixIcon:
+                        _searchController.text.isNotEmpty
+                            ? IconButton(
+                              icon: const Icon(Icons.clear_rounded),
+                              onPressed: () {
+                                _searchController.clear();
+                                _performSearch();
+                              },
+                            )
+                            : null,
                     filled: true,
-                    fillColor: widget.isDarkMode ? Colors.black87 : Colors.white,
+                    fillColor:
+                        widget.isDarkMode ? Colors.black87 : Colors.white,
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(12),
+                      // Consistent with other screens
                       borderSide: BorderSide.none,
                     ),
                   ),
@@ -400,12 +529,18 @@ class _SearchScreenState extends State<SearchScreen> {
                           color: Colors.red,
                           alignment: Alignment.centerRight,
                           padding: const EdgeInsets.only(right: 16),
-                          child: const Icon(Icons.delete_forever_rounded, color: Colors.white),
+                          child: const Icon(
+                            Icons.delete_forever_rounded,
+                            color: Colors.white,
+                          ),
                         ),
                         child: Padding(
                           padding: const EdgeInsets.only(right: 8),
                           child: ActionChip(
-                            label: Text(query, style: const TextStyle(fontSize: 12)),
+                            label: Text(
+                              query,
+                              style: const TextStyle(fontSize: 12),
+                            ),
                             onPressed: () {
                               _searchController.text = query;
                               _performSearch();
@@ -417,48 +552,68 @@ class _SearchScreenState extends State<SearchScreen> {
                   ),
                 ),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(localizations.translate('category'), style: Theme.of(context).textTheme.titleMedium),
+                    Text(
+                      localizations.translate('category'),
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
                     const SizedBox(height: 8),
                     Wrap(
                       spacing: 8,
-                      children: categories.map((category) {
-                        final isSelected = _selectedCategory == category;
-                        return ChoiceChip(
-                          label: Text(category),
-                          selected: isSelected,
-                          selectedColor: const Color(0xFFD4B087),
-                          onSelected: (selected) {
-                            setState(() {
-                              _selectedCategory = selected ? category : 'All';
-                              _performSearch();
-                            });
-                          },
-                        );
-                      }).toList(),
+                      children:
+                          categories.map((category) {
+                            final isSelected = _selectedCategory == category;
+                            return ChoiceChip(
+                              label: Text(category),
+                              selected: isSelected,
+                              selectedColor: const Color(0xFFD4B087),
+                              onSelected: (selected) {
+                                setState(() {
+                                  _selectedCategory =
+                                      selected ? category : 'All';
+                                  _performSearch();
+                                });
+                              },
+                            );
+                          }).toList(),
                     ),
                     const SizedBox(height: 12),
-                    Text(localizations.translate('governorate'), style: Theme.of(context).textTheme.titleMedium),
+                    Text(
+                      localizations.translate('governorate'),
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
                     const SizedBox(height: 8),
                     DropdownButton<String>(
                       value: _selectedGovernorate,
                       isExpanded: true,
-                      items: governorates.map((governorate) {
-                        return DropdownMenuItem(value: governorate, child: Text(governorate));
-                      }).toList(),
+                      items:
+                          governorates.map((governorate) {
+                            return DropdownMenuItem(
+                              value: governorate,
+                              child: Text(governorate),
+                            );
+                          }).toList(),
                       onChanged: (value) {
                         setState(() {
                           _selectedGovernorate = value!;
                           _performSearch();
-                          debugPrint('Selected governorate: $_selectedGovernorate');
+                          debugPrint(
+                            'Selected governorate: $_selectedGovernorate',
+                          );
                         });
                       },
                     ),
                     const SizedBox(height: 12),
-                    Text(localizations.translate('minimum_rating'), style: Theme.of(context).textTheme.titleMedium),
+                    Text(
+                      localizations.translate('minimum_rating'),
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
                     Slider(
                       value: _minRating,
                       min: 0.0,
@@ -488,116 +643,153 @@ class _SearchScreenState extends State<SearchScreen> {
               ),
               SizedBox(
                 height: MediaQuery.of(context).size.height * 0.4,
-                child: _isLoading
-                    ? const Center(child: CircularProgressIndicator())
-                    : _errorMessage != null
-                    ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(_errorMessage!, style: TextStyle(fontSize: 18, color: Colors.grey[600])),
-                      ElevatedButton(
-                        onPressed: _performSearch,
-                        child: Text(localizations.translate('retry')),
-                      ),
-                    ],
-                  ),
-                )
-                    : _filteredPlaces.isEmpty
-                    ? Center(
-                  child: Text(
-                    localizations.translate('no_places_found'),
-                    style: TextStyle(fontSize: 18, color: Colors.grey[600]),
-                  ),
-                )
-                    : _listView
-                    ? ListView.builder(
-                  controller: widget.scrollController,
-                  padding: const EdgeInsets.all(12),
-                  itemCount: _filteredPlaces.length,
-                  itemBuilder: (context, index) {
-                    final place = _filteredPlaces[index];
-                    return ListTile(
-                      leading: CachedNetworkImage(
-                        imageUrl: place.imageUrl,
-                        width: 50,
-                        height: 50,
-                        fit: BoxFit.cover,
-                        placeholder: (context, url) => Container(
-                          color: Colors.grey[300],
-                          child: const Center(child: CircularProgressIndicator()),
-                        ),
-                        errorWidget: (context, url, error) => const Icon(Icons.error),
-                      ),
-                      title: Text(place.name),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildRatingStars(place.rating),
-                          const SizedBox(height: 4),
-                          Icon(Icons.volume_up, size: 16, color: Colors.grey[600]),
-                        ],
-                      ),
-                      onTap: () => _navigateToPlaceDetails(place),
-                    );
-                  },
-                )
-                    : GridView.builder(
-                  controller: widget.scrollController,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 10,
-                    childAspectRatio: 0.8,
-                  ),
-                  padding: const EdgeInsets.all(12),
-                  itemCount: _filteredPlaces.length,
-                  itemBuilder: (context, index) {
-                    final place = _filteredPlaces[index];
-                    return GestureDetector(
-                      onTap: () => _navigateToPlaceDetails(place),
-                      child: Card(
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                        elevation: 4,
-                        child: Column(
-                          children: [
-                            Expanded(
-                              child: ClipRRect(
-                                borderRadius: const BorderRadius.vertical(top: Radius.circular(10)),
-                                child: CachedNetworkImage(
-                                  imageUrl: place.imageUrl,
-                                  fit: BoxFit.cover,
-                                  width: double.infinity,
-                                  placeholder: (context, url) => Container(
-                                    color: Colors.grey[300],
-                                    child: const Center(child: CircularProgressIndicator()),
-                                  ),
-                                  errorWidget: (context, url, error) => const Icon(Icons.error, size: 50),
+                child:
+                    _isLoading
+                        ? const Center(child: CircularProgressIndicator())
+                        : _errorMessage != null
+                        ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                _errorMessage!,
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  color: Colors.grey[600],
                                 ),
                               ),
+                              ElevatedButton(
+                                onPressed: _performSearch,
+                                child: Text(localizations.translate('retry')),
+                              ),
+                            ],
+                          ),
+                        )
+                        : _filteredPlaces.isEmpty
+                        ? Center(
+                          child: Text(
+                            localizations.translate('no_places_found'),
+                            style: TextStyle(
+                              fontSize: 18,
+                              color: Colors.grey[600],
                             ),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Column(
+                          ),
+                        )
+                        : _listView
+                        ? ListView.builder(
+                          controller: widget.scrollController,
+                          padding: const EdgeInsets.all(12),
+                          itemCount: _filteredPlaces.length,
+                          itemBuilder: (context, index) {
+                            final place = _filteredPlaces[index];
+                            return ListTile(
+                              leading: CachedNetworkImage(
+                                imageUrl: place.imageUrl,
+                                width: 50,
+                                height: 50,
+                                fit: BoxFit.cover,
+                                placeholder:
+                                    (context, url) => Container(
+                                      color: Colors.grey[300],
+                                      child: const Center(
+                                        child: CircularProgressIndicator(),
+                                      ),
+                                    ),
+                                errorWidget:
+                                    (context, url, error) =>
+                                        const Icon(Icons.error),
+                              ),
+                              title: Text(place.name),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    place.name,
-                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                                    textAlign: TextAlign.center,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  const SizedBox(height: 4),
                                   _buildRatingStars(place.rating),
+                                  const SizedBox(height: 4),
+                                  Icon(
+                                    Icons.volume_up,
+                                    size: 16,
+                                    color: Colors.grey[600],
+                                  ),
                                 ],
                               ),
-                            ),
-                          ],
+                              onTap: () => _navigateToPlaceDetails(place),
+                            );
+                          },
+                        )
+                        : GridView.builder(
+                          controller: widget.scrollController,
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2,
+                                crossAxisSpacing: 10,
+                                mainAxisSpacing: 10,
+                                childAspectRatio: 0.8,
+                              ),
+                          padding: const EdgeInsets.all(12),
+                          itemCount: _filteredPlaces.length,
+                          itemBuilder: (context, index) {
+                            final place = _filteredPlaces[index];
+                            return GestureDetector(
+                              onTap: () => _navigateToPlaceDetails(place),
+                              child: Card(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                elevation: 4,
+                                child: Column(
+                                  children: [
+                                    Expanded(
+                                      child: ClipRRect(
+                                        borderRadius:
+                                            const BorderRadius.vertical(
+                                              top: Radius.circular(10),
+                                            ),
+                                        child: CachedNetworkImage(
+                                          imageUrl: place.imageUrl,
+                                          fit: BoxFit.cover,
+                                          width: double.infinity,
+                                          placeholder:
+                                              (context, url) => Container(
+                                                color: Colors.grey[300],
+                                                child: const Center(
+                                                  child:
+                                                      CircularProgressIndicator(),
+                                                ),
+                                              ),
+                                          errorWidget:
+                                              (context, url, error) =>
+                                                  const Icon(
+                                                    Icons.error,
+                                                    size: 50,
+                                                  ),
+                                        ),
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Column(
+                                        children: [
+                                          Text(
+                                            place.name,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16,
+                                            ),
+                                            textAlign: TextAlign.center,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          const SizedBox(height: 4),
+                                          _buildRatingStars(place.rating),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
                         ),
-                      ),
-                    );
-                  },
-                ),
               ),
             ],
           ),

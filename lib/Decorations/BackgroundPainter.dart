@@ -70,7 +70,7 @@ class _BackgroundPainterState extends State<BackgroundPainter>
         final completer = Completer<ui.Image>();
         ImageStreamListener? listener;
         listener = ImageStreamListener(
-              (info, synchronousCall) {
+          (info, synchronousCall) {
             completer.complete(info.image);
             imageStream.removeListener(listener!);
           },
@@ -84,7 +84,7 @@ class _BackgroundPainterState extends State<BackgroundPainter>
         _images!.add(image);
       }
       setState(() {});
-    } catch (e, stackTrace) {
+    } catch (e) {
       _images = [];
       setState(() {});
     }
@@ -109,7 +109,7 @@ class _BackgroundPainterState extends State<BackgroundPainter>
     double columnWidth = (size.width - (columns - 1) * columnSpacing) / columns;
     List<double> columnOffsets = List.generate(
       columns,
-          (index) => index * (columnWidth + columnSpacing),
+      (index) => index * (columnWidth + columnSpacing),
     );
     List<double> columnHeights = List.filled(columns, 0.0);
 
@@ -120,14 +120,14 @@ class _BackgroundPainterState extends State<BackgroundPainter>
         if (_imagePositions.length >= _imageCount) break;
         double heightVariation =
             minHeightVariation +
-                Random().nextDouble() * (maxHeightVariation - minHeightVariation);
+            Random().nextDouble() * (maxHeightVariation - minHeightVariation);
         double imageHeight = baseHeight + heightVariation;
         double x =
             baseX +
-                (virtualWidth * (i / imagesPerColumn)) +
-                (Random().nextDouble() *
-                    imageWidth *
-                    0.5); // Slight stagger for better distribution
+            (virtualWidth * (i / imagesPerColumn)) +
+            (Random().nextDouble() *
+                imageWidth *
+                0.5); // Slight stagger for better distribution
         double y = columnHeights[col];
 
         if (y + imageHeight > size.height) {
@@ -200,8 +200,8 @@ class _BackgroundPainterCustom extends CustomPainter {
       if (dx < 0) dx += virtualWidth;
       final double screenDx =
           dx %
-              (size.width +
-                  imageWidth); // Extend beyond screen for smooth entry/exit
+          (size.width +
+              imageWidth); // Extend beyond screen for smooth entry/exit
       final double dy = imagePositions[i].dy;
 
       // Calculate opacity for fade effect at the edges
